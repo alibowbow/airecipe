@@ -24,34 +24,59 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        textarea:focus, input[type="text"]:focus {
+        textarea:focus, input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4); 
             border-color: #6366f1;
         }
         .tab-button {
             transition: all 0.25s ease-in-out;
-            border-bottom: 3px solid transparent;
-            padding: 0.6rem 0.5rem; /* 모바일/데스크탑 공통 패딩 조정 */
-             white-space: nowrap; 
+            border-bottom: 3px solid transparent; /* 기본 밑줄은 투명 */
+            padding-top: 0.6rem;
+            padding-bottom: 0.6rem; /* 기본 하단 패딩 */
+            padding-left: 0.5rem;
+            padding-right: 0.5rem; 
+            white-space: nowrap; 
             display: inline-flex; 
             align-items: center;
-            font-size: 0.8rem; /* 기본 글자 크기 조정 */
+            font-size: 0.8rem; 
+            line-height: 1.2; /* 텍스트와 밑줄 사이 간격 조정을 위해 추가 */
         }
-        @media (min-width: 768px) { /* md 이상 */
+        @media (min-width: 768px) { 
             .tab-button {
-                padding: 0.85rem 0.7rem;
-                font-size: 0.875rem; /* sm:text-sm */
+                padding-top: 0.85rem;
+                padding-bottom: 0.85rem; /* 데스크탑 기본 하단 패딩 */
+                padding-left: 0.7rem;
+                padding-right: 0.7rem;
+                font-size: 0.875rem; 
             }
         }
 
         .tab-button i { 
-            margin-right: 0.25rem; /* 아이콘과 텍스트 간격 조정 */
+            margin-right: 0.25rem; 
         }
         .tab-button.active {
             color: #4f46e5; 
-            border-bottom-color: #4f46e5;
+            border-bottom-color: #4f46e5; /* 활성 탭 밑줄 색상 */
             font-weight: 700;
+            /* 밑줄이 텍스트에 더 가깝게 보이도록 패딩 조정 */
+            /* padding-bottom 값에서 border-bottom-width (3px) 만큼 빼줍니다. */
+            /* Tailwind의 기본 패딩 값과 계산을 맞추기 위해 calc 사용 대신 직접 값을 조정합니다. */
+            /* 예: 0.6rem (9.6px) - 3px = 6.6px. Tailwind는 rem 단위를 사용하므로, 
+               정확한 계산보다는 시각적으로 조정하는 것이 나을 수 있습니다.
+               또는, border를 box-shadow로 대체하는 방법도 있습니다.
+               여기서는 padding-bottom을 직접 조정합니다. */
         }
+         /* 활성 탭의 하단 패딩을 더 줄여 밑줄을 올립니다. */
+        .tab-button.active {
+            padding-bottom: calc(0.6rem - 3px); /* 모바일: 기본 패딩 - 밑줄 두께 */
+        }
+        @media (min-width: 768px) {
+            .tab-button.active {
+                padding-bottom: calc(0.85rem - 3px); /* 데스크탑: 기본 패딩 - 밑줄 두께 */
+            }
+        }
+
+
         .tab-button:not(.active):hover {
             color: #3730a3; 
             background-color: #f0f2ff; 
@@ -131,25 +156,26 @@
         button#saveToRecipeBookButton:hover { background-color: #7c3aed; } /* Violet-600 */
 
 
-        .meal-plan-item, .themed-recipe-item, .saved-recipe-item { 
+        .meal-plan-item, .themed-recipe-item, .saved-recipe-item, .calorie-log-item, .exercise-log-item, .water-log-item { 
             border: 1px solid #e5e7eb;
             padding: 1rem;
             border-radius: 8px;
             margin-bottom: 0.75rem;
             background-color: #f9fafb;
         }
-        .meal-plan-item strong, .themed-recipe-item strong, .saved-recipe-item strong {
+        .meal-plan-item strong, .themed-recipe-item strong, .saved-recipe-item strong, .calorie-log-item strong, .exercise-log-item strong {
             color: #4f46e5;
         }
-        .meal-plan-item button, .themed-recipe-item button, .saved-recipe-item button {
+        .meal-plan-item button, .themed-recipe-item button, .saved-recipe-item button, .calorie-log-item button, .exercise-log-item button {
             font-size: 0.8rem;
             padding: 0.3rem 0.6rem;
             margin-top: 0.5rem;
         }
-        .saved-recipe-item .button-group button {
+        .saved-recipe-item .button-group button, .calorie-log-item .button-group button, .exercise-log-item .button-group button {
             margin-left: 0.5rem;
         }
-        #nutritionAnalysisResult, #shoppingListResult, #beveragePairingResult, #cookingTermResult, #unitConversionResult, #seasonalRecipeResult { 
+        #nutritionAnalysisResult, #shoppingListResult, #beveragePairingResult, #cookingTermResult, #unitConversionResult, #seasonalRecipeResult, 
+        #calorieTrackerResult, #dietPlannerResult, #exerciseTrackerResult, #waterIntakeResult, #dietTipResult { 
             margin-top: 1.5rem;
             padding-top: 1.5rem;
             border-top: 1px dashed #cbd5e1; 
@@ -162,6 +188,27 @@
         #copyShoppingListButton:hover {
             background-color: #4b5563; 
         }
+        /* 네비게이션 그룹 제목 스타일 수정 */
+        .nav-group-title {
+            font-size: 0.8rem; 
+            color: #4b5563; 
+            text-align: left; 
+            padding-left: 0.5rem; 
+            margin-top: 0.75rem; /* 그룹 간 상단 간격 */
+            margin-bottom: 0.25rem; 
+            font-weight: 600; 
+        }
+        #mainNavContainer > .nav-group-title:first-of-type { /* 첫번째 그룹 제목의 상단 마진 제거 */
+             margin-top: 0;
+        }
+        #additionalTabs > .nav-group-title { /* 추가 탭 내의 그룹 제목 상단 마진 */
+            margin-top: 0.75rem; /* md:mt-3 와 유사하게 */
+        }
+         #additionalTabs > .nav-group-title:first-child { /* 추가 탭 내의 첫 그룹 제목 상단 마진도 동일하게 */
+            margin-top: 0.75rem;
+        }
+
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8">
@@ -181,9 +228,11 @@
                 </button>
             </div>
 
-            <div id="mainNavContainer" class="border-b border-gray-200 pb-2 md:pb-4">
-                <div id="coreTabs" class="flex flex-wrap justify-center items-center gap-x-1 gap-y-2">
-                    <button data-tab="tab2" class="tab-button core-tab active"> <i class="fas fa-hat-chef"></i>오늘의 추천
+            <div id="mainNavContainer" class="border-b border-gray-200 pb-1 md:pb-2">
+                <div class="nav-group-title">레시피 탐색</div>
+                <div id="coreTabs" class="flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2">
+                    <button data-tab="tab2" class="tab-button core-tab active"> 
+                        <i class="fas fa-hat-chef"></i>오늘의 추천
                     </button>
                     <button data-tab="tab1" class="tab-button core-tab">
                         <i class="fas fa-cogs"></i>맞춤 레시피
@@ -191,33 +240,58 @@
                     <button data-tab="tab3" class="tab-button core-tab">
                         <i class="fas fa-book-sparkles"></i>요리 검색
                     </button>
-                    <button data-tab="tab4" class="tab-button core-tab">
-                        <i class="fas fa-carrot"></i>냉장고 파먹기
+                     <button data-tab="tab6" class="tab-button core-tab md:additional-tab"> <i class="fas fa-gifts"></i>테마별 요리
+                    </button>
+                    <button data-tab="tab10" class="tab-button core-tab md:additional-tab">
+                        <i class="fas fa-leaf"></i>제철 요리
                     </button>
                 </div>
 
-                <div id="additionalTabs" class="hidden md:flex md:flex-wrap md:justify-center md:items-center gap-x-1 gap-y-2 mt-2 md:mt-0 md:pt-2">
-                    <button data-tab="tab6" class="tab-button additional-tab">
-                        <i class="fas fa-gifts"></i>테마별 요리
-                    </button>
-                    <button data-tab="tab10" class="tab-button additional-tab">
-                        <i class="fas fa-leaf"></i>제철 요리
-                    </button>
-                    <button data-tab="tab7" class="tab-button additional-tab">
-                        <i class="fas fa-wine-glass"></i>음료 추천
-                    </button>
-                    <button data-tab="tab8" class="tab-button additional-tab">
-                        <i class="fas fa-book-open"></i>요리 용어
-                    </button>
-                    <button data-tab="tab9" class="tab-button additional-tab">
-                        <i class="fas fa-balance-scale"></i>단위 변환
-                    </button>
-                    <button data-tab="tab5" class="tab-button additional-tab">
-                        <i class="fas fa-calendar-alt"></i>AI 주간 식단
-                    </button>
-                    <button data-tab="tab11" class="tab-button additional-tab">
-                        <i class="fas fa-bookmark"></i>내 레시피북
-                    </button>
+                <div id="additionalTabs" class="hidden md:block"> 
+                    <div class="nav-group-title">주방 도구</div>
+                    <div class="flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2">
+                        <button data-tab="tab4" class="tab-button additional-tab">
+                            <i class="fas fa-carrot"></i>냉장고 파먹기
+                        </button>
+                        <button data-tab="tab7" class="tab-button additional-tab">
+                            <i class="fas fa-wine-glass"></i>음료 추천
+                        </button>
+                        <button data-tab="tab8" class="tab-button additional-tab">
+                            <i class="fas fa-book-open"></i>요리 용어
+                        </button>
+                        <button data-tab="tab9" class="tab-button additional-tab">
+                            <i class="fas fa-balance-scale"></i>단위 변환
+                        </button>
+                    </div>
+                    
+                    <div class="nav-group-title">헬스 플래너(베타)</div>
+                    <div class="flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2">
+                         <button data-tab="tab12" class="tab-button additional-tab">
+                            <i class="fas fa-calculator"></i>칼로리 트래커
+                        </button>
+                        <button data-tab="tab13" class="tab-button additional-tab">
+                            <i class="fas fa-utensils"></i>AI 다이어트 플랜
+                        </button>
+                        <button data-tab="tab14" class="tab-button additional-tab">
+                            <i class="fas fa-dumbbell"></i>운동 도우미
+                        </button>
+                        <button data-tab="tab15" class="tab-button additional-tab">
+                            <i class="fas fa-tint"></i>수분 트래커
+                        </button>
+                        <button data-tab="tab16" class="tab-button additional-tab">
+                            <i class="fas fa-lightbulb"></i>오늘의 다이어트 팁
+                        </button>
+                    </div>
+
+                    <div class="nav-group-title">나의 공간</div>
+                    <div class="flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2">
+                        <button data-tab="tab5" class="tab-button additional-tab">
+                            <i class="fas fa-calendar-alt"></i>AI 주간 식단
+                        </button>
+                        <button data-tab="tab11" class="tab-button additional-tab">
+                            <i class="fas fa-bookmark"></i>내 레시피북
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -243,11 +317,12 @@
                 </section>
             </div>
 
-            <div id="tab2" class="tab-content active"> <section class="space-y-7">
+            <div id="tab2" class="tab-content active"> 
+                 <section class="space-y-7">
                     <div>
                         <label for="whatToEatKeywords" class="block text-md font-semibold text-gray-800 mb-2.5">💡 원하는 요리 느낌 (선택 사항)</label>
                         <input type="text" id="whatToEatKeywords" class="w-full p-3.5 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 든든한 한 끼, 와인과 어울리는, 매콤한 도전">
-                        <p class="text-xs text-gray-500 mt-1.5">AI에게 자유로운 추천을 맡겨보세요!</p>
+                        <p class="text-xs text-gray-500 mt-1.5">AI에게 자유로운 추천을 맡겨보세요! (비워두셔도 좋습니다)</p>
                     </div>
                     <button id="recommendDishButton" class="action-button w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center">
                         <i class="fas fa-lightbulb-on mr-3"></i>오늘의 요리 추천받기
@@ -396,6 +471,138 @@
                 </section>
             </div>
 
+             <div id="tab12" class="tab-content"> <section class="space-y-7">
+                    <h3 class="text-xl font-bold text-indigo-600 mb-4">📝 스마트 칼로리 트래커</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="calorieFoodName" class="block text-md font-semibold text-gray-800 mb-2">음식/재료 이름</label>
+                            <input type="text" id="calorieFoodName" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="예: 닭가슴살 100g, 사과 1개">
+                        </div>
+                        <div>
+                            <label for="calorieMealType" class="block text-md font-semibold text-gray-800 mb-2">식사 종류</label>
+                            <select id="calorieMealType" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <option value="breakfast">아침</option>
+                                <option value="lunch">점심</option>
+                                <option value="dinner">저녁</option>
+                                <option value="snack">간식</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="analyzeAndLogCalorieButton" class="action-button w-full bg-green-500 hover:bg-green-600 text-white">
+                        <i class="fas fa-calculator mr-2"></i>칼로리 분석 및 기록
+                    </button>
+                    <div id="calorieTrackerResultWrapper" class="hidden">
+                        <div id="calorieTrackerResult" class="content-card"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">오늘의 섭취 기록</h4>
+                        <div id="dailyCalorieLog" class="space-y-2">
+                            <p class="text-gray-500 italic">아직 기록된 내용이 없습니다.</p>
+                        </div>
+                        <p class="text-right font-semibold text-gray-800 mt-3">총 섭취 칼로리: <span id="totalDailyCalories">0</span> kcal</p>
+                    </div>
+                </section>
+            </div>
+
+            <div id="tab13" class="tab-content"> <section class="space-y-7">
+                     <h3 class="text-xl font-bold text-indigo-600 mb-4">🍽️ AI 맞춤 다이어트 플래너</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="dietGoal" class="block text-md font-semibold text-gray-800 mb-2">다이어트 목표</label>
+                            <select id="dietGoal" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <option value="loss">체중 감량</option>
+                                <option value="maintenance">체중 유지</option>
+                                <option value="gain">근육 증가</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="activityLevel" class="block text-md font-semibold text-gray-800 mb-2">평소 활동량</label>
+                            <select id="activityLevel" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <option value="low">낮음 (주로 앉아서 생활)</option>
+                                <option value="moderate">보통 (가벼운 활동 또는 주 1-2회 운동)</option>
+                                <option value="high">높음 (규칙적인 운동 또는 활동적인 직업)</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="dietDuration" class="block text-md font-semibold text-gray-800 mb-2">목표 기간 (일)</label>
+                            <input type="number" id="dietDuration" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="예: 30">
+                        </div>
+                        <div>
+                            <label for="dietPreferences" class="block text-md font-semibold text-gray-800 mb-2">식단 선호/제한 (선택)</label>
+                            <input type="text" id="dietPreferencesPlanner" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="예: 저탄수화물, 글루텐 프리">
+                        </div>
+                    </div>
+                    <button id="generateDietPlanButton" class="action-button w-full bg-purple-500 hover:bg-purple-600 text-white">
+                        <i class="fas fa-magic mr-2"></i>AI 맞춤 식단 생성
+                    </button>
+                    <div id="dietPlannerResultWrapper" class="hidden">
+                        <div id="dietPlannerResult" class="content-card"></div>
+                    </div>
+                </section>
+            </div>
+             <div id="tab14" class="tab-content"> <section class="space-y-7">
+                    <h3 class="text-xl font-bold text-indigo-600 mb-4">💪 운동 도우미 & 소모 칼로리 계산</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="exerciseType" class="block text-md font-semibold text-gray-800 mb-2">운동 종류</label>
+                            <input type="text" id="exerciseType" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="예: 걷기, 조깅, 수영">
+                        </div>
+                        <div>
+                            <label for="exerciseDuration" class="block text-md font-semibold text-gray-800 mb-2">운동 시간 (분)</label>
+                            <input type="number" id="exerciseDuration" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="예: 30">
+                        </div>
+                    </div>
+                    <button id="calculateExerciseCaloriesButton" class="action-button w-full bg-blue-500 hover:bg-blue-600 text-white">
+                        <i class="fas fa-fire mr-2"></i>소모 칼로리 계산 및 기록
+                    </button>
+                    <div id="exerciseTrackerResultWrapper" class="hidden">
+                        <div id="exerciseTrackerResult" class="content-card"></div>
+                    </div>
+                     <div>
+                        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">오늘의 운동 기록</h4>
+                        <div id="dailyExerciseLog" class="space-y-2">
+                            <p class="text-gray-500 italic">아직 기록된 운동이 없습니다.</p>
+                        </div>
+                        <p class="text-right font-semibold text-gray-800 mt-3">총 소모 칼로리: <span id="totalDailyExerciseCalories">0</span> kcal</p>
+                    </div>
+                </section>
+            </div>
+
+            <div id="tab15" class="tab-content"> <section class="space-y-7">
+                    <h3 class="text-xl font-bold text-indigo-600 mb-4">💧 수분 섭취 트래커</h3>
+                    <div>
+                        <label for="waterIntakeGoal" class="block text-md font-semibold text-gray-800 mb-2">일일 목표 섭취량 (ml)</label>
+                        <input type="number" id="waterIntakeGoal" class="w-full p-3 border border-gray-300 rounded-lg" value="2000">
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <input type="number" id="waterIntakeAmount" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="섭취량 (ml)" value="250">
+                        <button id="logWaterIntakeButton" class="py-3 px-6 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg whitespace-nowrap">
+                            <i class="fas fa-plus mr-2"></i>기록
+                        </button>
+                    </div>
+                    <div class="mt-4">
+                        <div class="w-full bg-gray-200 rounded-full h-6">
+                            <div id="waterIntakeProgress" class="bg-blue-500 h-6 rounded-full text-xs font-medium text-blue-100 text-center p-0.5 leading-none" style="width: 0%">0%</div>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1 text-center">오늘 마신 물: <span id="currentWaterIntake">0</span> ml / <span id="waterGoalDisplay">2000</span> ml</p>
+                    </div>
+                     <div id="waterIntakeResultWrapper" class="hidden"> <div id="waterIntakeResult" class="content-card"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="tab16" class="tab-content"> <section class="space-y-7">
+                     <h3 class="text-xl font-bold text-indigo-600 mb-4">💡 오늘의 다이어트 꿀팁</h3>
+                    <button id="getDietTipButton" class="action-button w-full bg-pink-500 hover:bg-pink-600 text-white">
+                        <i class="fas fa-seedling mr-2"></i>새로운 꿀팁 보기
+                    </button>
+                    <div id="dietTipResultWrapper" class="hidden">
+                        <div id="dietTipResult" class="content-card"></div>
+                    </div>
+                </section>
+            </div>
+
+
         </div>
         
         <div id="loadingIndicator" class="my-10 text-indigo-600 hidden flex flex-col items-center justify-center text-lg">
@@ -487,7 +694,6 @@
         UIElements.tabButtons = document.querySelectorAll('.tab-button');
         UIElements.tabContents = document.querySelectorAll('.tab-content');
         UIElements.mobileMoreMenuButton = document.getElementById('mobileMoreMenuButton');
-        UIElements.mainNavContainer = document.getElementById('mainNavContainer'); 
         UIElements.coreTabsContainer = document.getElementById('coreTabs'); 
         UIElements.additionalTabsContainer = document.getElementById('additionalTabs'); 
 
@@ -512,6 +718,45 @@
         UIElements.themedRecipesDisplayWrapper = document.getElementById('themedRecipesDisplayWrapper');
         UIElements.themedRecipesDisplay = document.getElementById('themedRecipesDisplay');
         
+        // 헬스 플래너 UI 요소
+        UIElements.calorieFoodNameInput = document.getElementById('calorieFoodName');
+        UIElements.calorieMealTypeSelect = document.getElementById('calorieMealType');
+        UIElements.analyzeAndLogCalorieButton = document.getElementById('analyzeAndLogCalorieButton');
+        UIElements.calorieTrackerResultWrapper = document.getElementById('calorieTrackerResultWrapper');
+        UIElements.calorieTrackerResult = document.getElementById('calorieTrackerResult');
+        UIElements.dailyCalorieLogDiv = document.getElementById('dailyCalorieLog');
+        UIElements.totalDailyCaloriesSpan = document.getElementById('totalDailyCalories');
+
+        UIElements.dietGoalSelect = document.getElementById('dietGoal');
+        UIElements.activityLevelSelect = document.getElementById('activityLevel');
+        UIElements.dietDurationInput = document.getElementById('dietDuration');
+        UIElements.dietPreferencesPlannerInput = document.getElementById('dietPreferencesPlanner');
+        UIElements.generateDietPlanButton = document.getElementById('generateDietPlanButton');
+        UIElements.dietPlannerResultWrapper = document.getElementById('dietPlannerResultWrapper');
+        UIElements.dietPlannerResult = document.getElementById('dietPlannerResult');
+        
+        UIElements.exerciseTypeInput = document.getElementById('exerciseType');
+        UIElements.exerciseDurationInput = document.getElementById('exerciseDuration');
+        UIElements.calculateExerciseCaloriesButton = document.getElementById('calculateExerciseCaloriesButton');
+        UIElements.exerciseTrackerResultWrapper = document.getElementById('exerciseTrackerResultWrapper');
+        UIElements.exerciseTrackerResult = document.getElementById('exerciseTrackerResult');
+        UIElements.dailyExerciseLogDiv = document.getElementById('dailyExerciseLog');
+        UIElements.totalDailyExerciseCaloriesSpan = document.getElementById('totalDailyExerciseCalories');
+
+        UIElements.waterIntakeGoalInput = document.getElementById('waterIntakeGoal');
+        UIElements.waterIntakeAmountInput = document.getElementById('waterIntakeAmount');
+        UIElements.logWaterIntakeButton = document.getElementById('logWaterIntakeButton');
+        UIElements.waterIntakeProgressDiv = document.getElementById('waterIntakeProgress');
+        UIElements.currentWaterIntakeSpan = document.getElementById('currentWaterIntake');
+        UIElements.waterGoalDisplaySpan = document.getElementById('waterGoalDisplay');
+        UIElements.waterIntakeResultWrapper = document.getElementById('waterIntakeResultWrapper'); // AI 답변용
+        UIElements.waterIntakeResult = document.getElementById('waterIntakeResult'); // AI 답변용
+
+        UIElements.getDietTipButton = document.getElementById('getDietTipButton');
+        UIElements.dietTipResultWrapper = document.getElementById('dietTipResultWrapper');
+        UIElements.dietTipResult = document.getElementById('dietTipResult');
+
+
         UIElements.beverageDishNameInput = document.getElementById('beverageDishName');
         UIElements.getBeveragePairingButton = document.getElementById('getBeveragePairingButton');
         UIElements.beveragePairingResultWrapper = document.getElementById('beveragePairingResultWrapper');
@@ -571,12 +816,12 @@
 
                 if (isHidden) {
                     UIElements.additionalTabsContainer.classList.remove('hidden');
-                    UIElements.additionalTabsContainer.classList.add('grid', 'grid-cols-3', 'gap-2', 'mt-2', 'py-2', 'border-t', 'border-gray-200');
+                    UIElements.additionalTabsContainer.classList.add('grid', 'grid-cols-3', 'sm:grid-cols-4', 'gap-x-1', 'gap-y-2', 'mt-2', 'py-2', 'border-t', 'border-gray-200');
                     if(buttonTextEl) buttonTextEl.textContent = "메뉴 접기";
                     if(iconEl) iconEl.classList.replace('fa-chevron-down', 'fa-chevron-up');
                 } else {
                     UIElements.additionalTabsContainer.classList.add('hidden');
-                    UIElements.additionalTabsContainer.classList.remove('grid', 'grid-cols-3', 'gap-2', 'mt-2', 'py-2', 'border-t', 'border-gray-200');
+                    UIElements.additionalTabsContainer.classList.remove('grid', 'grid-cols-3', 'sm:grid-cols-4', 'gap-x-1', 'gap-y-2', 'mt-2', 'py-2', 'border-t', 'border-gray-200');
                     if(buttonTextEl) buttonTextEl.textContent = "더 많은 메뉴 보기";
                     if(iconEl) iconEl.classList.replace('fa-chevron-up', 'fa-chevron-down');
                 }
@@ -597,7 +842,9 @@
                     if(UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden');
                     [UIElements.recommendationDisplayWrapper, UIElements.mealPlanDisplayWrapper, UIElements.themedRecipesDisplayWrapper, 
                      UIElements.beveragePairingResultWrapper, UIElements.cookingTermResultWrapper, UIElements.unitConversionResultWrapper,
-                     UIElements.seasonalRecipeResultWrapper].forEach(wrapper => {
+                     UIElements.seasonalRecipeResultWrapper, UIElements.calorieTrackerResultWrapper, UIElements.dietPlannerResultWrapper,
+                     UIElements.exerciseTrackerResultWrapper, UIElements.waterIntakeResultWrapper, UIElements.dietTipResultWrapper
+                    ].forEach(wrapper => {
                         if (wrapper) wrapper.classList.add('hidden');
                     });
 
@@ -616,11 +863,21 @@
                     if (button.dataset.tab === 'tab11' && UIElements.savedRecipesListDiv) {
                         loadAndDisplaySavedRecipes();
                     }
+                    if (button.dataset.tab === 'tab12' && UIElements.dailyCalorieLogDiv) {
+                        loadDailyCalorieLog();
+                    }
+                     if (button.dataset.tab === 'tab14' && UIElements.dailyExerciseLogDiv) {
+                        loadDailyExerciseLog();
+                    }
+                    if (button.dataset.tab === 'tab15' && UIElements.waterIntakeProgressDiv) {
+                        loadAndUpdateWaterIntakeProgress();
+                    }
+
 
                     // 모바일에서 추가 메뉴의 탭 선택 후 "더보기" 메뉴 닫기
                     if (window.innerWidth < 768 && UIElements.additionalTabsContainer && !UIElements.additionalTabsContainer.classList.contains('hidden') && button.classList.contains('additional-tab')) {
                         UIElements.additionalTabsContainer.classList.add('hidden');
-                        UIElements.additionalTabsContainer.classList.remove('grid', 'grid-cols-3', 'gap-2', 'mt-2', 'py-2', 'border-t', 'border-gray-200');
+                        UIElements.additionalTabsContainer.classList.remove('grid', 'grid-cols-3', 'sm:grid-cols-4', 'gap-x-1', 'gap-y-2', 'mt-2', 'py-2', 'border-t', 'border-gray-200');
                         const buttonTextEl = UIElements.mobileMoreMenuButton.querySelector('#mobileMoreMenuButtonText');
                         const iconEl = UIElements.mobileMoreMenuButton.querySelector('#mobileMoreMenuIcon');
                         if(buttonTextEl) buttonTextEl.textContent = "더 많은 메뉴 보기";
@@ -681,7 +938,9 @@
                 UIElements.generateLeftoverRecipeButton, UIElements.generateMealPlanButton, UIElements.generateThemedRecipesButton, 
                 UIElements.confirmSubstituteButton, UIElements.analyzeNutritionButton, UIElements.generateShoppingListButton,
                 UIElements.getBeveragePairingButton, UIElements.searchCookingTermButton, UIElements.convertUnitButton,
-                UIElements.getSeasonalRecipesButton, UIElements.saveToRecipeBookButton
+                UIElements.getSeasonalRecipesButton, UIElements.saveToRecipeBookButton,
+                UIElements.analyzeAndLogCalorieButton, UIElements.generateDietPlanButton, UIElements.calculateExerciseCaloriesButton,
+                UIElements.logWaterIntakeButton, UIElements.getDietTipButton
             ];
             if (isLoading) {
                 if(UIElements.loadingIndicator) UIElements.loadingIndicator.classList.remove('hidden');
@@ -1104,10 +1363,16 @@
 
         if (UIElements.recommendDishButton) {
             UIElements.recommendDishButton.addEventListener('click', async () => {
-                const keywordsVal = UIElements.whatToEatKeywordsInput ? UIElements.whatToEatKeywordsInput.value.trim() : "특별한 조건 없음";
+                const keywordsVal = UIElements.whatToEatKeywordsInput ? (UIElements.whatToEatKeywordsInput.value.trim() || "특별한 조건 없음") : "특별한 조건 없음";
+                let recommendationPromptPart;
+                if (keywordsVal === "특별한 조건 없음") {
+                    recommendationPromptPart = `사용자가 "오늘 뭐 먹지?" 고민을 하고 있지만 특별한 키워드는 입력하지 않았습니다. 사용자를 위해 창의적이고 흥미로운 요리 1가지와 그 요리를 추천하는 간단한 이유를 자유롭게 제안해주세요.`;
+                } else {
+                    recommendationPromptPart = `사용자가 "오늘 뭐 먹지?" 고민을 하고 있습니다. 다음 키워드를 참고하여, 창의적이고 흥미로운 요리 1가지와 그 요리를 추천하는 간단한 이유를 제안해주세요.\n* 사용자 키워드: ${keywordsVal}`;
+                }
+                
                 const prompt = `
-사용자가 "오늘 뭐 먹지?" 고민을 하고 있습니다. 다음 키워드를 참고하여, 창의적이고 흥미로운 요리 1가지와 그 요리를 추천하는 간단한 이유를 제안해주세요.
-* 사용자 키워드: ${keywordsVal}
+${recommendationPromptPart}
 
 응답 형식:
 **추천 요리:** [요리 이름]
@@ -1620,12 +1885,223 @@ ${currentRecipeFullText}
                 showError("삭제할 레시피를 찾지 못했습니다.");
             }
         }
-         // 초기 로드 시 "내 레시피북" 탭이 활성화되어 있다면 목록 로드
-        const initialActiveTab = document.querySelector('.tab-button.active');
-        if (initialActiveTab && initialActiveTab.dataset.tab === 'tab11') {
-            loadAndDisplaySavedRecipes();
+        
+        // 초기 로드 시 "오늘의 추천" 탭 활성화
+        const defaultInitialTabId = 'tab2';
+        // 이전에 선언된 initialActiveTabButton 변수를 재사용하지 않도록 let 또는 const를 다시 사용하지 않습니다.
+        let initialActiveTabButtonForLoad = document.querySelector(`.tab-button[data-tab="${defaultInitialTabId}"]`);
+        let initialActiveTabContentForLoad = document.getElementById(defaultInitialTabId);
+
+        // 모든 탭에서 'active' 클래스 먼저 제거
+        if (UIElements.tabButtons) {
+            UIElements.tabButtons.forEach(btn => btn.classList.remove('active'));
+        }
+        if (UIElements.tabContents) {
+            UIElements.tabContents.forEach(content => content.classList.remove('active'));
         }
 
+        if (initialActiveTabButtonForLoad && initialActiveTabContentForLoad) {
+            initialActiveTabButtonForLoad.classList.add('active');
+            initialActiveTabContentForLoad.classList.add('active');
+        } else if (UIElements.tabButtons && UIElements.tabButtons.length > 0) { // Fallback: 첫 번째 탭 활성화
+            UIElements.tabButtons[0].classList.add('active');
+            const fallbackTabId = UIElements.tabButtons[0].dataset.tab;
+            const fallbackContent = document.getElementById(fallbackTabId);
+            if (fallbackContent) {
+                fallbackContent.classList.add('active');
+                initialActiveTabButtonForLoad = UIElements.tabButtons[0]; 
+            }
+        }
+        
+        // 초기 활성화된 탭에 따른 데이터 로드 (initialActiveTabButtonForLoad 변수 사용)
+        if (initialActiveTabButtonForLoad) { 
+            const activeTab = initialActiveTabButtonForLoad.dataset.tab;
+            if (activeTab === 'tab11') loadAndDisplaySavedRecipes();
+            if (activeTab === 'tab12') loadDailyCalorieLog();
+            if (activeTab === 'tab14') loadDailyExerciseLog();
+            if (activeTab === 'tab15') loadAndUpdateWaterIntakeProgress();
+        }
+
+
+        // --- 헬스 플래너 기능들 ---
+        if(UIElements.analyzeAndLogCalorieButton) {
+            UIElements.analyzeAndLogCalorieButton.addEventListener('click', async () => {
+                const foodName = UIElements.calorieFoodNameInput.value.trim();
+                const mealType = UIElements.calorieMealTypeSelect.value;
+                if (!foodName) {
+                    showError("칼로리를 분석하고 기록할 음식/재료 이름을 입력해주세요.");
+                    return;
+                }
+                if (UIElements.calorieTrackerResultWrapper) UIElements.calorieTrackerResultWrapper.classList.add('hidden');
+
+                const prompt = `음식 "${foodName}"의 예상 칼로리와 주요 영양 성분(탄수화물, 단백질, 지방)을 알려주세요. 결과는 명확한 목록 형태로 제공해주세요. (예: **총 칼로리:** 약 XXX kcal)`;
+                const analysisResult = await callGeminiAPI(prompt, true);
+
+                if (analysisResult && UIElements.calorieTrackerResult) {
+                    displayFormattedText(analysisResult, UIElements.calorieTrackerResult, `"${foodName}" 분석 결과`, "calorieTracker");
+                    // 로컬 스토리지에 기록 (간단화된 버전)
+                    const calorieMatch = analysisResult.match(/총 칼로리:\s*약\s*(\d+)\s*kcal/i);
+                    const calories = calorieMatch ? parseInt(calorieMatch[1], 10) : 0;
+                    saveCalorieLog({ foodName, mealType, calories, details: analysisResult });
+                    loadDailyCalorieLog();
+                }
+            });
+        }
+        
+        if(UIElements.generateDietPlanButton) {
+            UIElements.generateDietPlanButton.addEventListener('click', async () => {
+                const goal = UIElements.dietGoalSelect.value;
+                const level = UIElements.activityLevelSelect.value;
+                const duration = UIElements.dietDurationInput.value.trim();
+                const preferences = UIElements.dietPreferencesPlannerInput.value.trim() || "특별한 제한 없음";
+
+                if (!duration || isNaN(parseInt(duration)) || parseInt(duration) <=0) {
+                    showError("올바른 목표 기간을 입력해주세요 (숫자, 1 이상).");
+                    return;
+                }
+                if (UIElements.dietPlannerResultWrapper) UIElements.dietPlannerResultWrapper.classList.add('hidden');
+                const prompt = `사용자의 다이어트 목표는 "${goal}", 활동량 수준은 "${level}", 목표 기간은 ${duration}일, 식단 선호/제한 사항은 "${preferences}" 입니다. 이를 바탕으로 ${duration}일치 맞춤형 다이어트 식단 계획을 세워주세요. 각 날짜별 아침, 점심, 저녁 메뉴와 간단한 레시피 아이디어를 포함해주세요.`;
+                const resultText = await callGeminiAPI(prompt, true);
+                 if (resultText && UIElements.dietPlannerResult) {
+                    displayFormattedText(resultText, UIElements.dietPlannerResult, "AI 맞춤 다이어트 식단", "dietPlanner");
+                }
+            });
+        }
+
+        if(UIElements.calculateExerciseCaloriesButton) {
+            UIElements.calculateExerciseCaloriesButton.addEventListener('click', async () => {
+                const type = UIElements.exerciseTypeInput.value.trim();
+                const duration = UIElements.exerciseDurationInput.value.trim();
+                if(!type || !duration || isNaN(parseInt(duration)) || parseInt(duration) <=0){
+                    showError("운동 종류와 시간을 올바르게 입력해주세요.");
+                    return;
+                }
+                if(UIElements.exerciseTrackerResultWrapper) UIElements.exerciseTrackerResultWrapper.classList.add('hidden');
+                const prompt = `"${type}" 운동을 ${duration}분 동안 했을 때 예상되는 소모 칼로리를 계산해주세요. 결과는 "예상 소모 칼로리: 약 XXX kcal" 형식으로 알려주세요.`;
+                const resultText = await callGeminiAPI(prompt, true);
+                if(resultText && UIElements.exerciseTrackerResult){
+                    displayFormattedText(resultText, UIElements.exerciseTrackerResult, `"${type}" (${duration}분) 소모 칼로리`, "exerciseTracker");
+                    const calorieMatch = resultText.match(/약\s*(\d+)\s*kcal/i);
+                    const caloriesBurned = calorieMatch ? parseInt(calorieMatch[1], 10) : 0;
+                    saveExerciseLog({ type, duration, caloriesBurned });
+                    loadDailyExerciseLog();
+                }
+            });
+        }
+
+        if(UIElements.logWaterIntakeButton){
+            UIElements.logWaterIntakeButton.addEventListener('click', () => {
+                const amount = parseInt(UIElements.waterIntakeAmountInput.value, 10);
+                if(isNaN(amount) || amount <= 0) {
+                    showError("올바른 섭취량을 입력해주세요.");
+                    return;
+                }
+                logWater(amount);
+                loadAndUpdateWaterIntakeProgress();
+                UIElements.waterIntakeAmountInput.value = "250"; // 기본값으로 리셋
+            });
+        }
+        if(UIElements.waterIntakeGoalInput){
+             UIElements.waterIntakeGoalInput.addEventListener('change', loadAndUpdateWaterIntakeProgress);
+        }
+
+
+        if(UIElements.getDietTipButton){
+            UIElements.getDietTipButton.addEventListener('click', async () => {
+                if(UIElements.dietTipResultWrapper) UIElements.dietTipResultWrapper.classList.add('hidden');
+                const prompt = "오늘의 다이어트 꿀팁을 하나 알려주세요. 짧고 실용적인 내용으로 부탁합니다.";
+                const resultText = await callGeminiAPI(prompt, true);
+                if(resultText && UIElements.dietTipResult){
+                    displayFormattedText(resultText, UIElements.dietTipResult, "오늘의 다이어트 꿀팁", "dietTip");
+                }
+            });
+        }
+        
+        // 칼로리 기록 관련 함수
+        function getTodaysDateString() { return new Date().toISOString().split('T')[0]; }
+
+        function saveCalorieLog(entry) {
+            const today = getTodaysDateString();
+            let logs = JSON.parse(localStorage.getItem(`calorieLog_${today}`)) || [];
+            logs.push({...entry, time: new Date().toLocaleTimeString()});
+            localStorage.setItem(`calorieLog_${today}`, JSON.stringify(logs));
+        }
+
+        function loadDailyCalorieLog() {
+            if(!UIElements.dailyCalorieLogDiv || !UIElements.totalDailyCaloriesSpan) return;
+            const today = getTodaysDateString();
+            const logs = JSON.parse(localStorage.getItem(`calorieLog_${today}`)) || [];
+            UIElements.dailyCalorieLogDiv.innerHTML = '';
+            let totalCalories = 0;
+            if (logs.length === 0) {
+                UIElements.dailyCalorieLogDiv.innerHTML = '<p class="text-gray-500 italic">아직 기록된 내용이 없습니다.</p>';
+            } else {
+                logs.forEach(log => {
+                    const logItem = document.createElement('div');
+                    logItem.classList.add('calorie-log-item', 'text-sm');
+                    logItem.innerHTML = `<strong>${log.mealType}:</strong> ${log.foodName} - 약 ${log.calories} kcal <i>(${log.time})</i>`;
+                    UIElements.dailyCalorieLogDiv.appendChild(logItem);
+                    totalCalories += log.calories;
+                });
+            }
+            UIElements.totalDailyCaloriesSpan.textContent = totalCalories;
+        }
+        
+        // 운동 기록 관련 함수
+        function saveExerciseLog(entry) {
+            const today = getTodaysDateString();
+            let logs = JSON.parse(localStorage.getItem(`exerciseLog_${today}`)) || [];
+            logs.push({...entry, time: new Date().toLocaleTimeString()});
+            localStorage.setItem(`exerciseLog_${today}`, JSON.stringify(logs));
+        }
+
+        function loadDailyExerciseLog() {
+            if(!UIElements.dailyExerciseLogDiv || !UIElements.totalDailyExerciseCaloriesSpan) return;
+            const today = getTodaysDateString();
+            const logs = JSON.parse(localStorage.getItem(`exerciseLog_${today}`)) || [];
+            UIElements.dailyExerciseLogDiv.innerHTML = '';
+            let totalCaloriesBurned = 0;
+            if (logs.length === 0) {
+                UIElements.dailyExerciseLogDiv.innerHTML = '<p class="text-gray-500 italic">아직 기록된 운동이 없습니다.</p>';
+            } else {
+                logs.forEach(log => {
+                    const logItem = document.createElement('div');
+                    logItem.classList.add('exercise-log-item', 'text-sm');
+                    logItem.innerHTML = `<strong>${log.type}</strong> (${log.duration}분) - 약 ${log.caloriesBurned} kcal 소모 <i>(${log.time})</i>`;
+                    UIElements.dailyExerciseLogDiv.appendChild(logItem);
+                    totalCaloriesBurned += log.caloriesBurned;
+                });
+            }
+            UIElements.totalDailyExerciseCaloriesSpan.textContent = totalCaloriesBurned;
+        }
+
+        // 수분 섭취 관련 함수
+        function logWater(amount) {
+            const today = getTodaysDateString();
+            let currentIntake = parseInt(localStorage.getItem(`waterIntake_${today}`), 10) || 0;
+            currentIntake += amount;
+            localStorage.setItem(`waterIntake_${today}`, currentIntake);
+        }
+
+        function loadAndUpdateWaterIntakeProgress() {
+            if(!UIElements.waterIntakeProgressDiv || !UIElements.currentWaterIntakeSpan || !UIElements.waterGoalDisplaySpan || !UIElements.waterIntakeGoalInput) return;
+            const today = getTodaysDateString();
+            const currentIntake = parseInt(localStorage.getItem(`waterIntake_${today}`), 10) || 0;
+            const goal = parseInt(UIElements.waterIntakeGoalInput.value, 10) || 2000;
+            
+            UIElements.currentWaterIntakeSpan.textContent = currentIntake;
+            UIElements.waterGoalDisplaySpan.textContent = goal;
+            
+            const percentage = Math.min((currentIntake / goal) * 100, 100);
+            UIElements.waterIntakeProgressDiv.style.width = `${percentage}%`;
+            UIElements.waterIntakeProgressDiv.textContent = `${Math.round(percentage)}%`;
+
+            if (percentage >= 100) {
+                UIElements.waterIntakeProgressDiv.classList.replace('bg-blue-500', 'bg-green-500');
+            } else {
+                UIElements.waterIntakeProgressDiv.classList.replace('bg-green-500', 'bg-blue-500');
+            }
+        }
     });
     </script>
 </body>

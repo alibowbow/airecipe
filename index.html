@@ -496,9 +496,14 @@
             }
         }
 
-        // Gemini API 호출 함수
+        // Gemini API 호출 함수 (개인 Glitch 엔드포인트 사용)
         async function callGeminiAPI(prompt, isAuxiliaryAction = false) {
             setLoading(true, isAuxiliaryAction ? "AI가 정보를 처리 중입니다..." : "최고의 레시피를 구상 중...");
+            
+            // 사용자가 제공한 개인 Glitch 엔드포인트
+            const API_ENDPOINT = "https://magenta-morning-find.glitch.me/generate"; 
+
+            // 페이로드 구조는 이전과 동일하게 유지 (Gemini API와 유사한 구조를 Glitch에서 처리한다고 가정)
             const payload = {
                 contents: [{ role: "user", parts: [{ text: prompt }] }],
                 generationConfig: {
@@ -506,34 +511,46 @@
                     maxOutputTokens: isAuxiliaryAction ? 1024 : 2048, 
                 }
             };
-            const apiKey = ""; 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             
             try {
-                const response = await fetch(apiUrl, {
+                const response = await fetch(API_ENDPOINT, { // 수정된 API 엔드포인트 사용
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: { message: '응답 JSON 파싱 실패 또는 빈 응답' } }));
-                    console.error("API Error Data:", errorData);
-                    throw new Error(`API 요청 실패 (${response.status}): ${errorData.error?.message || '알 수 없는 서버 오류'}`);
+                    // Glitch 엔드포인트의 오류 응답 형식에 따라 오류 메시지 파싱 시도
+                    let errorMsg = `API 요청 실패 (${response.status})`;
+                    try {
+                        const errorData = await response.json();
+                        // Glitch에서 반환하는 오류 메시지 구조에 따라 아래를 수정해야 할 수 있습니다.
+                        // 예: errorData.error?.message 또는 errorData.message 등
+                        errorMsg += `: ${errorData.message || errorData.error || JSON.stringify(errorData) || '알 수 없는 서버 오류'}`;
+                    } catch (e) {
+                        errorMsg += `: 응답 본문 파싱 실패 또는 텍스트 응답`;
+                    }
+                    console.error("API Error Full Response:", response);
+                    throw new Error(errorMsg);
                 }
+
                 const result = await response.json();
 
+                // Glitch 엔드포인트가 Gemini API와 유사한 응답 구조를 반환한다고 가정
+                // 또는 Glitch에서 직접 텍스트를 반환할 수도 있음
                 if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
                     return result.candidates[0].content.parts[0].text;
-                } else if (result.promptFeedback?.blockReason) {
-                     throw new Error(`AI가 응답을 생성하지 못했습니다. 이유: ${result.promptFeedback.blockReason}. (안전 설정 관련일 수 있습니다)`);
-                } else if (result.candidates && result.candidates[0]?.finishReason && result.candidates[0].finishReason !== 'STOP') {
-                     throw new Error(`AI 응답이 완료되지 못했습니다. 이유: ${result.candidates[0].finishReason}.`);
-                } else {
+                } else if (typeof result === 'string') { // Glitch가 직접 텍스트를 반환하는 경우
+                    return result;
+                } else if (result.text) { // Glitch가 { text: "..." } 형태로 반환하는 경우
+                     return result.text;
+                }
+                 else {
                     console.error("API 응답에 유효한 내용이 없거나, 예상치 못한 구조입니다:", result);
                     throw new Error('AI로부터 유효한 응답을 받지 못했습니다. 응답 내용이 비어있거나 형식이 다를 수 있습니다.');
                 }
             } catch (error) {
-                console.error("Gemini API 호출 중 예외 발생:", error);
+                console.error("API 호출 중 예외 발생:", error);
                 showError(error.message || "API 통신 중 심각한 문제가 발생했습니다. 네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.");
                 return null;
             } finally {
@@ -552,14 +569,10 @@
                 return;
             }
 
-            // rawText가 null이거나 빈 문자열일 때의 기본 처리 (주로 API 호출 실패 시)
             if (!rawText || rawText.trim() === "") {
-                // 이 경우는 보통 callGeminiAPI에서 null을 반환하고 showError가 이미 호출된 상태이거나,
-                // 호출부에서 빈 응답에 대한 showError를 호출한 후이므로, 여기서는 추가적인 오류 표시는 자제.
-                // 대신, 컨테이너를 비우고 관련 섹션이 숨겨져 있도록 보장.
                 containerElement.innerHTML = `<p class="text-gray-500 italic text-center py-8">표시할 내용이 없습니다.</p>`;
                 if (UIElements.recipeOutputSection && (outputType === "recipe" || outputType === "substitution")) {
-                    UIElements.recipeOutputSection.classList.remove('hidden'); // 섹션은 보여주되, 내용 없음을 알림
+                    UIElements.recipeOutputSection.classList.remove('hidden'); 
                 }
                 if (outputType === "recipe" && UIElements.additionalActionsSection) UIElements.additionalActionsSection.classList.add('hidden');
                 return;
@@ -567,7 +580,6 @@
 
             containerElement.innerHTML = ''; 
             
-            // 제목 및 추가 액션 버튼 관리 (레시피 관련 출력 시)
             if (outputType === "recipe" || outputType === "substitution") {
                 if(UIElements.recipeOutputTitle) UIElements.recipeOutputTitle.textContent = title;
                 if (outputType === "recipe") { 
@@ -581,14 +593,10 @@
                         UIElements.shoppingListResultDiv.classList.add('hidden');
                         UIElements.shoppingListResultDiv.innerHTML = '';
                     }
-                } else if (outputType === "substitution") { // 재료 대체 시에도 추가 액션은 보이도록
+                } else if (outputType === "substitution") { 
                     if(UIElements.additionalActionsSection) UIElements.additionalActionsSection.classList.remove('hidden'); 
                 }
-            } else if (outputType === "nutrition" || outputType === "shoppingList") {
-                // 영양 정보나 쇼핑 리스트는 recipeDisplay가 아닌 별도 div에 표시되므로, recipeOutputTitle은 건드리지 않음.
-                // additionalActionsSection은 이미 recipe 타입에서 관리됨.
             }
-
 
             const lines = rawText.split('\n');
             let currentList = null; 
@@ -727,12 +735,9 @@
                 if (isLikelyTitle) {
                     if (currentList) { containerElement.appendChild(currentList); currentList = null; } 
                     const h3 = document.createElement('h3');
-                    // content-card 내부의 h3와 구분하기 위해 card-title 클래스 대신 일반 스타일 적용
                     h3.innerHTML = applyBoldMarkdown((sectionTitleMatch[2] || sectionTitleMatch[3]).trim()); 
                     h3.classList.add('text-xl', 'font-semibold', 'text-indigo-700', 'mb-3');
                      if (isFirstTitleInCard && (outputType === "recipe" || outputType === "substitution" || outputType === "nutrition" || outputType === "shoppingList")) { 
-                        // recipeDisplay 내부의 첫 제목은 mt-0, 그 외 (recommendationDisplay 등)는 content-card의 h3 스타일 따름
-                        // card-title 클래스를 recipeOutputTitle에만 적용하고 여기서는 일반 h3 스타일링
                          h3.classList.add('mt-0'); 
                          isFirstTitleInCard = false;
                     } else {
@@ -770,21 +775,19 @@
 
             if (currentList) { containerElement.appendChild(currentList); } 
             
-            // 각 타입에 맞는 wrapper 표시
             if (outputType === "recommendation" && UIElements.recommendationDisplayWrapper) UIElements.recommendationDisplayWrapper.classList.remove('hidden');
             else if (outputType === "mealPlan" && UIElements.mealPlanDisplayWrapper) UIElements.mealPlanDisplayWrapper.classList.remove('hidden');
             else if (outputType === "themedRecipes" && UIElements.themedRecipesDisplayWrapper) UIElements.themedRecipesDisplayWrapper.classList.remove('hidden');
-            else if ((outputType === "recipe" || outputType === "substitution") && UIElements.recipeOutputSection) { // nutrition, shoppingList는 recipeOutputSection 내 다른 div에 표시
+            else if ((outputType === "recipe" || outputType === "substitution") && UIElements.recipeOutputSection) { 
                  UIElements.recipeOutputSection.classList.remove('hidden');
             } else if (outputType === "nutrition" && UIElements.nutritionAnalysisResultDiv) {
                  UIElements.nutritionAnalysisResultDiv.classList.remove('hidden');
-                 if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.remove('hidden'); // 부모 섹션도 보이게
+                 if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.remove('hidden'); 
             } else if (outputType === "shoppingList" && UIElements.shoppingListResultDiv) {
                  UIElements.shoppingListResultDiv.classList.remove('hidden');
-                 if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.remove('hidden'); // 부모 섹션도 보이게
+                 if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.remove('hidden'); 
             }
             
-            // 스크롤 맨 위로 (내용이 길 경우를 대비)
             if (containerElement && UIElements.recipeOutputSection && UIElements.recipeOutputSection.contains(containerElement)) {
                 UIElements.recipeOutputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else if (containerElement) {
@@ -870,7 +873,6 @@
             UIElements.searchSpecificDishButton.addEventListener('click', async () => {
                 const dishNameVal = UIElements.specificDishNameInput ? UIElements.specificDishNameInput.value.trim() : "";
 
-                // 검색 시작 전, 이전 결과 및 관련 섹션 초기화/숨김
                 if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden');
                 if (UIElements.recipeDisplay) UIElements.recipeDisplay.innerHTML = '<p class="text-gray-500 italic text-center py-8">결과가 여기에 표시됩니다.</p>';
                 if (UIElements.additionalActionsSection) UIElements.additionalActionsSection.classList.add('hidden');
@@ -886,7 +888,7 @@
 
                 if (!dishNameVal) {
                     showError('검색할 요리 이름을 입력해주세요.');
-                    if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden'); // 확실히 숨김
+                    if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden'); 
                     return;
                 }
                 
@@ -928,10 +930,9 @@ ${dishNameVal} (또는 AI가 판단한 정확한 요리 이름)
 
                 if (recipeText && recipeText.trim() !== "" && UIElements.recipeDisplay) {
                     displayFormattedText(recipeText, UIElements.recipeDisplay, `✨ "${dishNameVal}" 레시피 ✨`, "recipe");
-                    // recipeOutputSection은 displayFormattedText 내부에서 보이도록 처리됨
-                } else if (recipeText === null) { // API 호출 실패 (showError는 callGeminiAPI에서 이미 처리)
+                } else if (recipeText === null) { 
                     if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden');
-                } else { // API 응답은 성공했으나 내용이 비어있는 경우
+                } else { 
                     showError(`"${dishNameVal}"에 대한 레시피를 찾을 수 없거나 AI 응답이 비어있습니다. 다른 검색어를 사용하거나 잠시 후 다시 시도해 주세요.`);
                     if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden');
                 }
@@ -1043,10 +1044,6 @@ ${dishNameVal} (또는 AI가 판단한 정확한 요리 이름)
                 const reasonForSub = UIElements.substitutionReasonInput ? UIElements.substitutionReasonInput.value.trim() : "";
 
                 if (!ingredientToSub) {
-                    // 모달 내에서 오류를 직접 표시하거나, 메인 showError를 호출할 수 있습니다.
-                    // 여기서는 모달을 닫지 않고 사용자에게 알리는 것이 더 나을 수 있습니다.
-                    // 간단하게 alert 대신 console.error 또는 모달 내에 작은 오류 메시지 공간을 만들 수 있습니다.
-                    // 지금은 showError를 사용하되, 모달이 닫히는 것을 감수합니다.
                     showError("대체하고 싶은 재료 이름을 입력해주세요."); 
                     return;
                 }

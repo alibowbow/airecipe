@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 레시피 셰프 Pro ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            background-color: #f8f9fc; 
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f0f2f5; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #d1d9e6; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b0b8c9; }
+        
+        .spinner {
+            border-width: 3px;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        textarea:focus, input[type="text"]:focus {
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4); 
+            border-color: #6366f1;
+        }
+        .tab-button {
+            transition: all 0.25s ease-in-out;
+            border-bottom: 3px solid transparent;
+            padding: 0.85rem 0.7rem; 
+             white-space: nowrap; 
+            display: inline-flex; 
+            align-items: center;
+        }
+        .tab-button i { 
+            margin-right: 0.35rem;
+        }
+        .tab-button.active {
+            color: #4f46e5; 
+            border-bottom-color: #4f46e5;
+            font-weight: 700;
+        }
+        .tab-button:not(.active):hover {
+            color: #3730a3; 
+            background-color: #f0f2ff; 
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card {
+            background-color: white;
+            border-radius: 18px; 
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06); 
+            padding: 2rem 2.5rem; 
+            margin-top: 2rem; 
+        }
+        .content-card h3.card-title { /* content-card 내부의 h3에만 적용될 수 있도록 클래스 추가 */
+            font-size: 1.4rem; 
+            font-weight: 700;
+            color: #3730a3; 
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.7rem;
+            border-bottom: 1px solid #e5e7eb; 
+        }
+         .content-card ul, .content-card ol {
+            padding-left: 1.4rem;
+        }
+        .content-card li {
+            margin-bottom: 0.7rem;
+            line-height: 1.8;
+            color: #4b5563; 
+        }
+        .content-card strong {
+            font-weight: 700;
+            color: #1f2937; 
+        }
+        .content-card p {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 0.85rem;
+        }
+        .action-button { 
+            font-size: 1.05rem;
+            padding-top: 0.9rem;
+            padding-bottom: 0.9rem;
+        }
+        button#substituteIngredientButton, button#analyzeNutritionButton, button#generateShoppingListButton { /* ID로 정확히 지정 */
+            color: white;
+            font-weight: bold;
+            padding: 0.75rem 1.2rem;
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); 
+            transition: all 0.15s ease-in-out;
+            margin-top: 0.5rem;
+        }
+        button#substituteIngredientButton:hover, button#analyzeNutritionButton:hover, button#generateShoppingListButton:hover {
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
+        }
+
+        button#substituteIngredientButton { background-color: #f59e0b; } 
+        button#substituteIngredientButton:hover { background-color: #d97706; } 
+        button#analyzeNutritionButton { background-color: #10b981; } 
+        button#analyzeNutritionButton:hover { background-color: #059669; } 
+        button#generateShoppingListButton { background-color: #3b82f6; } 
+        button#generateShoppingListButton:hover { background-color: #2563eb; } 
+
+        .meal-plan-item, .themed-recipe-item { 
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            background-color: #f9fafb;
+        }
+        .meal-plan-item strong, .themed-recipe-item strong {
+            color: #4f46e5;
+        }
+        .meal-plan-item button, .themed-recipe-item button {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            margin-top: 0.5rem;
+        }
+        #nutritionAnalysisResult, #shoppingListResult { 
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed #cbd5e1; 
+        }
+        #copyShoppingListButton {
+            background-color: #6b7280; 
+            color: white;
+            margin-top: 1rem;
+        }
+        #copyShoppingListButton:hover {
+            background-color: #4b5563; 
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8">
+
+    <div class="container mx-auto max-w-5xl w-full">
+        <header class="text-center my-10 lg:my-14">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500">
+                AI 레시피 셰프
+            </h1>
+            <p class="text-lg sm:text-xl text-gray-600 mt-5">AI와 함께, 매일매일 특별한 미식 경험을 만들어보세요!</p>
+        </header>
+
+        <nav class="mb-10 flex flex-wrap justify-center border-b border-gray-200">
+            <button data-tab="tab1" class="tab-button active text-gray-600 text-sm sm:text-base">
+                <i class="fas fa-cogs"></i>맞춤 레시피
+            </button>
+            <button data-tab="tab2" class="tab-button text-gray-600 text-sm sm:text-base">
+                <i class="fas fa-hat-chef"></i>오늘의 추천
+            </button>
+            <button data-tab="tab3" class="tab-button text-gray-600 text-sm sm:text-base">
+                <i class="fas fa-book-sparkles"></i>요리 검색
+            </button>
+            <button data-tab="tab4" class="tab-button text-gray-600 text-sm sm:text-base">
+                <i class="fas fa-carrot"></i>냉장고 파먹기
+            </button>
+            <button data-tab="tab5" class="tab-button text-gray-600 text-sm sm:text-base">
+                <i class="fas fa-calendar-alt"></i>AI 주간 식단
+            </button>
+            <button data-tab="tab6" class="tab-button text-gray-600 text-sm sm:text-base">
+                <i class="fas fa-gifts"></i>테마별 요리
+            </button>
+        </nav>
+
+        <div class="bg-white p-6 sm:p-10 rounded-xl shadow-xl relative">
+            <div id="tab1" class="tab-content active">
+                <section class="space-y-7">
+                    <p class="text-md text-gray-700 mb-4">원하는 요리 스타일과 식단 선호도를 알려주시면, AI가 완벽한 레시피와 함께 필요한 모든 재료를 추천해 드립니다!</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-7">
+                        <div>
+                            <label for="dietaryPreferences" class="block text-md font-semibold text-gray-800 mb-2.5">🥗 식단 선호도/제한 (선택 사항)</label>
+                            <input type="text" id="dietaryPreferences" class="w-full p-3.5 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 저탄수화물, 비건, 견과류 제외">
+                        </div>
+                        <div>
+                            <label for="cuisineStyle" class="block text-md font-semibold text-gray-800 mb-2.5">🍜 선호 요리 스타일 (선택 사항)</label>
+                            <input type="text" id="cuisineStyle" class="w-full p-3.5 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 이탈리안, 퓨전 한식, 초간단">
+                        </div>
+                    </div>
+                    <button id="generateRecipeButton" class="action-button w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-wand-magic-sparkles mr-3"></i>AI 추천 레시피 생성
+                    </button>
+                </section>
+            </div>
+
+            <div id="tab2" class="tab-content">
+                 <section class="space-y-7">
+                    <div>
+                        <label for="whatToEatKeywords" class="block text-md font-semibold text-gray-800 mb-2.5">💡 원하는 요리 느낌 (선택 사항)</label>
+                        <input type="text" id="whatToEatKeywords" class="w-full p-3.5 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 든든한 한 끼, 와인과 어울리는, 매콤한 도전">
+                        <p class="text-xs text-gray-500 mt-1.5">AI에게 자유로운 추천을 맡겨보세요!</p>
+                    </div>
+                    <button id="recommendDishButton" class="action-button w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-lightbulb-on mr-3"></i>오늘의 요리 추천받기
+                    </button>
+                    <div id="recommendationDisplayWrapper" class="hidden">
+                        <div id="recommendationDisplay" class="content-card">
+                            </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="tab3" class="tab-content">
+                <section class="space-y-7">
+                    <div>
+                        <label for="specificDishName" class="block text-md font-semibold text-gray-800 mb-2.5">🍳 찾고 싶은 요리 이름</label>
+                        <input type="text" id="specificDishName" class="w-full p-3.5 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 봉골레 파스타, 닭볶음탕">
+                    </div>
+                    <button id="searchSpecificDishButton" class="action-button w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-book-open-reader mr-3"></i>레시피 검색
+                    </button>
+                </section>
+            </div>
+            
+            <div id="tab4" class="tab-content">
+                <section class="space-y-7">
+                    <div>
+                        <label for="leftoverIngredients" class="block text-md font-semibold text-gray-800 mb-2.5">🥕 냉장고 속 재료 입력</label>
+                        <textarea id="leftoverIngredients" rows="4" class="w-full p-3.5 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 남은 삼겹살 조금, 시금치 반 단, 두부 반 모, 양파 1/4개"></textarea>
+                        <p class="text-xs text-gray-500 mt-1.5">가지고 있는 재료들을 최대한 활용하는 레시피를 찾아드립니다!</p>
+                    </div>
+                     <div>
+                        <label for="leftoverCuisineStyle" class="block text-md font-semibold text-gray-800 mb-2.5">🍜 선호 요리 스타일 (선택 사항)</label>
+                        <input type="text" id="leftoverCuisineStyle" class="w-full p-3.5 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 한식, 간단한 볶음, 국물 요리">
+                    </div>
+                    <button id="generateLeftoverRecipeButton" class="action-button w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-recycle mr-3"></i>냉장고 파먹기 레시피 생성!
+                    </button>
+                </section>
+            </div>
+
+            <div id="tab5" class="tab-content">
+                <section class="space-y-7">
+                    <div>
+                        <label for="mealPlanPreferences" class="block text-md font-semibold text-gray-800 mb-2.5">📅 주간 식단 요청사항</label>
+                        <input type="text" id="mealPlanPreferences" class="w-full p-3.5 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 고단백 위주, 채식으로 일주일, 간단한 저녁 메뉴들">
+                        <p class="text-xs text-gray-500 mt-1.5">AI가 7일치 저녁 식단 아이디어를 제안해 드립니다.</p>
+                    </div>
+                    <button id="generateMealPlanButton" class="action-button w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-calendar-check mr-3"></i>AI 주간 식단 생성!
+                    </button>
+                     <div id="mealPlanDisplayWrapper" class="hidden">
+                        <div id="mealPlanDisplay" class="content-card">
+                            </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="tab6" class="tab-content">
+                <section class="space-y-7">
+                    <div>
+                        <label for="themeKeywords" class="block text-md font-semibold text-gray-800 mb-2.5">🎉 원하는 테마/상황 입력</label>
+                        <input type="text" id="themeKeywords" class="w-full p-3.5 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 생일 파티, 캠핑 요리, 비 오는 날, 손님 초대">
+                        <p class="text-xs text-gray-500 mt-1.5">AI가 테마에 맞는 특별한 요리들을 추천해 드립니다.</p>
+                    </div>
+                    <button id="generateThemedRecipesButton" class="action-button w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-gifts mr-3"></i>테마 요리 추천받기!
+                    </button>
+                     <div id="themedRecipesDisplayWrapper" class="hidden">
+                        <div id="themedRecipesDisplay" class="content-card">
+                            </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <div id="loadingIndicator" class="my-10 text-indigo-600 hidden flex flex-col items-center justify-center text-lg">
+            <svg class="spinner w-12 h-12 mr-3 border-indigo-500 rounded-full" viewBox="0 0 24 24"></svg>
+            <p id="loadingText" class="mt-4 font-semibold text-gray-700">AI 셰프가 열심히 요리 중...</p>
+        </div>
+
+        <section id="recipeOutputSection" class="hidden">
+             <div class="content-card">
+                <h2 id="recipeOutputTitle" class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center">✨ AI 셰프의 답변 ✨</h2>
+                <div id="recipeDisplay" class="w-full min-h-[100px] space-y-6"> <p class="text-gray-500 italic text-center py-8">결과가 여기에 표시됩니다.</p>
+                </div>
+                <div id="additionalActionsSection" class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 hidden">
+                    <button id="generateShoppingListButton" class="text-sm sm:text-base inline-flex items-center justify-center">
+                        <i class="fas fa-list-check mr-2"></i> 장보기 목록 생성
+                    </button>
+                    <button id="substituteIngredientButton" class="text-sm sm:text-base inline-flex items-center justify-center">
+                        <i class="fas fa-exchange-alt mr-2"></i> 재료 대체 추천
+                    </button>
+                    <button id="analyzeNutritionButton" class="text-sm sm:text-base inline-flex items-center justify-center">
+                        <i class="fas fa-chart-pie mr-2"></i> 영양 정보 분석
+                    </button>
+                </div>
+                <div id="shoppingListResult" class="hidden"> </div>
+                <div id="nutritionAnalysisResult" class="hidden"> </div>
+             </div>
+        </section>
+    </div>
+
+    <div id="substituteModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full mx-auto transform transition-all duration-300 ease-out scale-95 opacity-0">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">재료 대체 추천 요청</h3>
+                <button id="closeSubstituteModal" class="text-gray-400 hover:text-gray-600 transition-colors text-2xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <p class="text-gray-600 text-sm">현재 보고 계신 레시피에서 바꾸고 싶은 재료를 알려주세요. AI가 적절한 대체 재료를 추천해 드립니다.</p>
+                <div>
+                    <label for="ingredientToSubstitute" class="block text-sm font-medium text-gray-700 mb-1">바꾸고 싶은 재료 이름:</label>
+                    <input type="text" id="ingredientToSubstitute" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 우유, 돼지고기 목살">
+                </div>
+                 <div>
+                    <label for="substitutionReason" class="block text-sm font-medium text-gray-700 mb-1">대체 이유 (선택 사항):</label>
+                    <input type="text" id="substitutionReason" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="예: 알레르기, 채식, 집에 없어서">
+                </div>
+            </div>
+            <div class="mt-8 text-right">
+                <button id="confirmSubstituteButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors text-sm shadow-md hover:shadow-lg">
+                    AI에게 추천 요청
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full mx-auto transform transition-all duration-300 ease-out scale-95 opacity-0" 
+             data-modal-state="closed">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-2xl font-bold text-red-600 flex items-center"><i class="fas fa-exclamation-triangle mr-3"></i>오류 발생</h3>
+                <button id="closeErrorModal" class="text-gray-400 hover:text-gray-600 transition-colors text-2xl">&times;</button>
+            </div>
+            <p id="errorMessage" class="text-gray-700 mb-8 text-md leading-relaxed">오류 메시지가 여기에 표시됩니다.</p>
+            <div class="text-right">
+                <button id="confirmErrorModal" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors text-sm shadow-md hover:shadow-lg">
+                    확인
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <textarea id="clipboardHelper" style="position: absolute; left: -9999px; top: -9999px;"></textarea>
+
+
+    <script>
+    // 전역 변수
+    let currentRecipeFullText = ""; 
+
+    // DOM 요소들을 저장할 객체
+    const UIElements = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 주요 UI 요소들 가져오기
+        UIElements.tabButtons = document.querySelectorAll('.tab-button');
+        UIElements.tabContents = document.querySelectorAll('.tab-content');
+        UIElements.dietaryPreferencesInput = document.getElementById('dietaryPreferences');
+        UIElements.cuisineStyleInput = document.getElementById('cuisineStyle');
+        UIElements.generateRecipeButton = document.getElementById('generateRecipeButton');
+        UIElements.whatToEatKeywordsInput = document.getElementById('whatToEatKeywords');
+        UIElements.recommendDishButton = document.getElementById('recommendDishButton');
+        UIElements.recommendationDisplayWrapper = document.getElementById('recommendationDisplayWrapper');
+        UIElements.recommendationDisplay = document.getElementById('recommendationDisplay');
+        UIElements.specificDishNameInput = document.getElementById('specificDishName');
+        UIElements.searchSpecificDishButton = document.getElementById('searchSpecificDishButton');
+        UIElements.leftoverIngredientsInput = document.getElementById('leftoverIngredients');
+        UIElements.leftoverCuisineStyleInput = document.getElementById('leftoverCuisineStyle');
+        UIElements.generateLeftoverRecipeButton = document.getElementById('generateLeftoverRecipeButton');
+        UIElements.mealPlanPreferencesInput = document.getElementById('mealPlanPreferences');
+        UIElements.generateMealPlanButton = document.getElementById('generateMealPlanButton');
+        UIElements.mealPlanDisplayWrapper = document.getElementById('mealPlanDisplayWrapper');
+        UIElements.mealPlanDisplay = document.getElementById('mealPlanDisplay');
+        UIElements.themeKeywordsInput = document.getElementById('themeKeywords');
+        UIElements.generateThemedRecipesButton = document.getElementById('generateThemedRecipesButton');
+        UIElements.themedRecipesDisplayWrapper = document.getElementById('themedRecipesDisplayWrapper');
+        UIElements.themedRecipesDisplay = document.getElementById('themedRecipesDisplay');
+        UIElements.loadingIndicator = document.getElementById('loadingIndicator');
+        UIElements.loadingText = document.getElementById('loadingText');
+        UIElements.recipeOutputSection = document.getElementById('recipeOutputSection');
+        UIElements.recipeOutputTitle = document.getElementById('recipeOutputTitle');
+        UIElements.recipeDisplay = document.getElementById('recipeDisplay');
+        UIElements.additionalActionsSection = document.getElementById('additionalActionsSection');
+        UIElements.generateShoppingListButton = document.getElementById('generateShoppingListButton'); 
+        UIElements.shoppingListResultDiv = document.getElementById('shoppingListResult'); 
+        UIElements.substituteIngredientButton = document.getElementById('substituteIngredientButton');
+        UIElements.analyzeNutritionButton = document.getElementById('analyzeNutritionButton'); 
+        UIElements.nutritionAnalysisResultDiv = document.getElementById('nutritionAnalysisResult'); 
+        UIElements.substituteModal = document.getElementById('substituteModal');
+        UIElements.substituteModalContent = UIElements.substituteModal ? UIElements.substituteModal.querySelector('div > div') : null;
+        UIElements.closeSubstituteModalButton = document.getElementById('closeSubstituteModal');
+        UIElements.ingredientToSubstituteInput = document.getElementById('ingredientToSubstitute');
+        UIElements.substitutionReasonInput = document.getElementById('substitutionReason');
+        UIElements.confirmSubstituteButton = document.getElementById('confirmSubstituteButton');
+        UIElements.errorModal = document.getElementById('errorModal');
+        UIElements.errorModalContentEl = UIElements.errorModal ? UIElements.errorModal.querySelector('div[data-modal-state]') : null;
+        UIElements.errorMessageElement = document.getElementById('errorMessage');
+        UIElements.closeErrorModalButton = document.getElementById('closeErrorModal');
+        UIElements.confirmErrorModalButton = document.getElementById('confirmErrorModal');
+        UIElements.clipboardHelper = document.getElementById('clipboardHelper');
+
+        // 탭 기능 초기화
+        if (UIElements.tabButtons && UIElements.tabContents) {
+            UIElements.tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    UIElements.tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    UIElements.tabContents.forEach(content => content.classList.remove('active'));
+                    const activeTabContent = document.getElementById(button.dataset.tab);
+                    if (activeTabContent) activeTabContent.classList.add('active');
+                    
+                    // 탭 변경 시 공통 초기화
+                    if(UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden');
+                    if(UIElements.recommendationDisplayWrapper) UIElements.recommendationDisplayWrapper.classList.add('hidden');
+                    if(UIElements.mealPlanDisplayWrapper) UIElements.mealPlanDisplayWrapper.classList.add('hidden');
+                    if(UIElements.themedRecipesDisplayWrapper) UIElements.themedRecipesDisplayWrapper.classList.add('hidden'); 
+                    if(UIElements.additionalActionsSection) UIElements.additionalActionsSection.classList.add('hidden'); 
+                    if(UIElements.nutritionAnalysisResultDiv) {
+                        UIElements.nutritionAnalysisResultDiv.classList.add('hidden');
+                        UIElements.nutritionAnalysisResultDiv.innerHTML = ''; 
+                    }
+                    if(UIElements.shoppingListResultDiv) {
+                        UIElements.shoppingListResultDiv.classList.add('hidden');
+                        UIElements.shoppingListResultDiv.innerHTML = '';
+                    }
+                    currentRecipeFullText = ""; 
+                });
+            });
+        }
+        
+        // 오류 모달 관련 함수
+        function showError(message) {
+            if(UIElements.errorMessageElement) UIElements.errorMessageElement.textContent = message;
+            if(UIElements.errorModal) UIElements.errorModal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                if(UIElements.errorModalContentEl) {
+                    UIElements.errorModalContentEl.classList.remove('scale-95', 'opacity-0');
+                    UIElements.errorModalContentEl.classList.add('scale-100', 'opacity-100');
+                }
+            });
+        }
+        function hideErrorModal() {
+            if(UIElements.errorModalContentEl){
+                UIElements.errorModalContentEl.classList.add('scale-95', 'opacity-0');
+                UIElements.errorModalContentEl.classList.remove('scale-100', 'opacity-100');
+            }
+            if(UIElements.errorModal) {
+                setTimeout(() => UIElements.errorModal.classList.add('hidden'), 300);
+            }
+        }
+        if(UIElements.closeErrorModalButton) UIElements.closeErrorModalButton.addEventListener('click', hideErrorModal);
+        if(UIElements.confirmErrorModalButton) UIElements.confirmErrorModalButton.addEventListener('click', hideErrorModal);
+
+        // 재료 대체 모달 관련 함수
+        function showSubstituteModal() {
+            if(UIElements.ingredientToSubstituteInput) UIElements.ingredientToSubstituteInput.value = ''; 
+            if(UIElements.substitutionReasonInput) UIElements.substitutionReasonInput.value = '';
+            if(UIElements.substituteModal) UIElements.substituteModal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                if(UIElements.substituteModalContent){
+                    UIElements.substituteModalContent.classList.remove('scale-95', 'opacity-0');
+                    UIElements.substituteModalContent.classList.add('scale-100', 'opacity-100');
+                }
+            });
+        }
+        function hideSubstituteModal() {
+             if(UIElements.substituteModalContent){
+                UIElements.substituteModalContent.classList.add('scale-95', 'opacity-0');
+                UIElements.substituteModalContent.classList.remove('scale-100', 'opacity-100');
+            }
+            if(UIElements.substituteModal) {
+                setTimeout(() => UIElements.substituteModal.classList.add('hidden'), 300);
+            }
+        }
+        if(UIElements.substituteIngredientButton) UIElements.substituteIngredientButton.addEventListener('click', showSubstituteModal);
+        if(UIElements.closeSubstituteModalButton) UIElements.closeSubstituteModalButton.addEventListener('click', hideSubstituteModal);
+
+        // 로딩 상태 관리 함수
+        function setLoading(isLoading, message = "AI 셰프가 열심히 요리 중...") {
+            const allActionButtons = [
+                UIElements.generateRecipeButton, UIElements.recommendDishButton, UIElements.searchSpecificDishButton, 
+                UIElements.generateLeftoverRecipeButton, UIElements.generateMealPlanButton, UIElements.generateThemedRecipesButton, 
+                UIElements.confirmSubstituteButton, UIElements.analyzeNutritionButton, UIElements.generateShoppingListButton
+            ];
+            if (isLoading) {
+                if(UIElements.loadingIndicator) UIElements.loadingIndicator.classList.remove('hidden');
+                if(UIElements.loadingText) UIElements.loadingText.textContent = message;
+                allActionButtons.forEach(btn => { if(btn) {btn.disabled = true; btn.classList.add('opacity-70', 'cursor-not-allowed');} });
+            } else {
+                if(UIElements.loadingIndicator) UIElements.loadingIndicator.classList.add('hidden');
+                allActionButtons.forEach(btn => { if(btn) {btn.disabled = false; btn.classList.remove('opacity-70', 'cursor-not-allowed');} });
+            }
+        }
+
+        // Gemini API 호출 함수
+        async function callGeminiAPI(prompt, isAuxiliaryAction = false) {
+            setLoading(true, isAuxiliaryAction ? "AI가 정보를 처리 중입니다..." : "최고의 레시피를 구상 중...");
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.7, topK: 40, topP: 0.95,
+                    maxOutputTokens: isAuxiliaryAction ? 1024 : 2048, 
+                }
+            };
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: { message: '응답 JSON 파싱 실패 또는 빈 응답' } }));
+                    console.error("API Error Data:", errorData);
+                    throw new Error(`API 요청 실패 (${response.status}): ${errorData.error?.message || '알 수 없는 서버 오류'}`);
+                }
+                const result = await response.json();
+
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    return result.candidates[0].content.parts[0].text;
+                } else if (result.promptFeedback?.blockReason) {
+                     throw new Error(`AI가 응답을 생성하지 못했습니다. 이유: ${result.promptFeedback.blockReason}. (안전 설정 관련일 수 있습니다)`);
+                } else if (result.candidates && result.candidates[0]?.finishReason && result.candidates[0].finishReason !== 'STOP') {
+                     throw new Error(`AI 응답이 완료되지 못했습니다. 이유: ${result.candidates[0].finishReason}.`);
+                } else {
+                    console.error("API 응답에 유효한 내용이 없거나, 예상치 못한 구조입니다:", result);
+                    throw new Error('AI로부터 유효한 응답을 받지 못했습니다. 응답 내용이 비어있거나 형식이 다를 수 있습니다.');
+                }
+            } catch (error) {
+                console.error("Gemini API 호출 중 예외 발생:", error);
+                showError(error.message || "API 통신 중 심각한 문제가 발생했습니다. 네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.");
+                return null;
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        function applyBoldMarkdown(text) {
+            return text.replace(/\*\*(?!\s)(.+?)(?<!\s)\*\*/g, '<strong>$1</strong>');
+        }
+
+        function displayFormattedText(rawText, containerElement, title, outputType = "recipe") {
+            if (!(containerElement instanceof HTMLElement)) {
+                console.error(`displayFormattedText: containerElement (${containerElement ? containerElement.id : 'N/A'})가 유효한 HTML 요소가 아닙니다. Title: "${title}"`);
+                showError(`콘텐츠를 표시할 내부 영역을 찾을 수 없습니다: ${title}`);
+                return;
+            }
+
+            // rawText가 null이거나 빈 문자열일 때의 기본 처리 (주로 API 호출 실패 시)
+            if (!rawText || rawText.trim() === "") {
+                // 이 경우는 보통 callGeminiAPI에서 null을 반환하고 showError가 이미 호출된 상태이거나,
+                // 호출부에서 빈 응답에 대한 showError를 호출한 후이므로, 여기서는 추가적인 오류 표시는 자제.
+                // 대신, 컨테이너를 비우고 관련 섹션이 숨겨져 있도록 보장.
+                containerElement.innerHTML = `<p class="text-gray-500 italic text-center py-8">표시할 내용이 없습니다.</p>`;
+                if (UIElements.recipeOutputSection && (outputType === "recipe" || outputType === "substitution")) {
+                    UIElements.recipeOutputSection.classList.remove('hidden'); // 섹션은 보여주되, 내용 없음을 알림
+                }
+                if (outputType === "recipe" && UIElements.additionalActionsSection) UIElements.additionalActionsSection.classList.add('hidden');
+                return;
+            }
+
+            containerElement.innerHTML = ''; 
+            
+            // 제목 및 추가 액션 버튼 관리 (레시피 관련 출력 시)
+            if (outputType === "recipe" || outputType === "substitution") {
+                if(UIElements.recipeOutputTitle) UIElements.recipeOutputTitle.textContent = title;
+                if (outputType === "recipe") { 
+                    currentRecipeFullText = rawText; 
+                    if(UIElements.additionalActionsSection) UIElements.additionalActionsSection.classList.remove('hidden'); 
+                    if(UIElements.nutritionAnalysisResultDiv) {
+                        UIElements.nutritionAnalysisResultDiv.classList.add('hidden');
+                        UIElements.nutritionAnalysisResultDiv.innerHTML = ''; 
+                    }
+                    if(UIElements.shoppingListResultDiv) {
+                        UIElements.shoppingListResultDiv.classList.add('hidden');
+                        UIElements.shoppingListResultDiv.innerHTML = '';
+                    }
+                } else if (outputType === "substitution") { // 재료 대체 시에도 추가 액션은 보이도록
+                    if(UIElements.additionalActionsSection) UIElements.additionalActionsSection.classList.remove('hidden'); 
+                }
+            } else if (outputType === "nutrition" || outputType === "shoppingList") {
+                // 영양 정보나 쇼핑 리스트는 recipeDisplay가 아닌 별도 div에 표시되므로, recipeOutputTitle은 건드리지 않음.
+                // additionalActionsSection은 이미 recipe 타입에서 관리됨.
+            }
+
+
+            const lines = rawText.split('\n');
+            let currentList = null; 
+            let isFirstTitleInCard = true; 
+
+            lines.forEach(line => {
+                let processedLine = line.trim();
+                if (!processedLine) return; 
+
+                const buttonPatternRegex = /(?:->\s*)?(?:\[|\uFF3B)([^\]\uFF3D]+?)(?:\]|\uFF3D)\s*전체 레시피 보기/;
+                if ((outputType === "recommendation" || outputType === "themedRecipes") && buttonPatternRegex.test(processedLine)) {
+                    const dishNameMatch = processedLine.match(buttonPatternRegex);
+                    if (dishNameMatch && dishNameMatch[1]) {
+                        const dishName = dishNameMatch[1].trim();
+                        const pButton = document.createElement('p');
+                        pButton.classList.add('mt-6', 'text-center'); 
+                        const button = document.createElement('button');
+                        button.innerHTML = `<i class="fas fa-utensils mr-2"></i> ${applyBoldMarkdown(dishName)} 레시피 보기`;
+                        button.classList.add('bg-indigo-500', 'hover:bg-indigo-600', 'text-white', 'font-semibold', 'py-3', 'px-6', 'rounded-lg', 'shadow-md', 'hover:shadow-lg', 'transition-all', 'duration-150', 'text-base', 'inline-flex', 'items-center');
+                        button.onclick = () => {
+                            if(UIElements.specificDishNameInput) UIElements.specificDishNameInput.value = dishName; 
+                            if (UIElements.tabButtons && UIElements.tabContents && UIElements.searchSpecificDishButton) {
+                                UIElements.tabButtons.forEach(btn => btn.classList.remove('active')); 
+                                const tab3Button = document.querySelector('button[data-tab="tab3"]');
+                                if(tab3Button) tab3Button.classList.add('active'); 
+                                UIElements.tabContents.forEach(content => content.classList.remove('active')); 
+                                const tab3Content = document.getElementById('tab3');
+                                if(tab3Content) tab3Content.classList.add('active'); 
+                                if(UIElements.recommendationDisplayWrapper) UIElements.recommendationDisplayWrapper.classList.add('hidden'); 
+                                if(UIElements.themedRecipesDisplayWrapper) UIElements.themedRecipesDisplayWrapper.classList.add('hidden');
+                                UIElements.searchSpecificDishButton.click(); 
+                            }
+                        };
+                        pButton.appendChild(button);
+                        containerElement.appendChild(pButton);
+                        return; 
+                    }
+                }
+                
+                if (outputType === "mealPlan" && /^(월요일|화요일|수요일|목요일|금요일|토요일|일요일)\s*:/i.test(processedLine)) {
+                    if (currentList) { containerElement.appendChild(currentList); currentList = null; } 
+                    const parts = processedLine.split(/:(.+)/); 
+                    const day = parts[0].trim();
+                    const mealDesc = parts[1] ? parts[1].trim() : "추천 메뉴 정보 없음";
+                    
+                    const mealItemDiv = document.createElement('div');
+                    mealItemDiv.classList.add('meal-plan-item');
+                    
+                    const dayStrong = document.createElement('strong');
+                    dayStrong.textContent = day + ": ";
+                    mealItemDiv.appendChild(dayStrong);
+                    
+                    const descSpan = document.createElement('span');
+                    const mealNameMatch = mealDesc.match(/^([^-(]+)/);
+                    const mealNameForButton = mealNameMatch ? mealNameMatch[1].trim() : mealDesc.substring(0,15); 
+
+                    descSpan.innerHTML = applyBoldMarkdown(mealDesc); 
+                    mealItemDiv.appendChild(descSpan);
+
+                    const searchRecipeBtn = document.createElement('button');
+                    searchRecipeBtn.innerHTML = `<i class="fas fa-search mr-1"></i> "${mealNameForButton}" 레시피 검색`;
+                    searchRecipeBtn.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700', 'font-medium', 'py-1', 'px-2', 'rounded', 'text-xs', 'block', 'mt-2');
+                    searchRecipeBtn.onclick = () => {
+                        if(UIElements.specificDishNameInput) UIElements.specificDishNameInput.value = mealNameForButton;
+                        if (UIElements.tabButtons && UIElements.tabContents && UIElements.searchSpecificDishButton) {
+                            UIElements.tabButtons.forEach(btn => btn.classList.remove('active'));
+                            const tab3Button = document.querySelector('button[data-tab="tab3"]');
+                            if(tab3Button) tab3Button.classList.add('active');
+                            UIElements.tabContents.forEach(content => content.classList.remove('active'));
+                            const tab3Content = document.getElementById('tab3');
+                            if(tab3Content) tab3Content.classList.add('active');
+                            if(UIElements.mealPlanDisplayWrapper) UIElements.mealPlanDisplayWrapper.classList.add('hidden');
+                            UIElements.searchSpecificDishButton.click();
+                        }
+                    };
+                    mealItemDiv.appendChild(searchRecipeBtn);
+                    containerElement.appendChild(mealItemDiv);
+                    return; 
+                }
+                
+                 if (outputType === "themedRecipes" && /^\d+\.\s*([^:]+):\s*(.+)/.test(processedLine)) {
+                     if (currentList) { containerElement.appendChild(currentList); currentList = null; }
+                    const itemMatch = processedLine.match(/^\d+\.\s*([^:]+):\s*(.+)/);
+                    const recipeName = itemMatch[1].trim();
+                    const recipeDesc = itemMatch[2].trim();
+
+                    const themedItemDiv = document.createElement('div');
+                    themedItemDiv.classList.add('themed-recipe-item');
+
+                    const nameStrong = document.createElement('strong');
+                    nameStrong.textContent = recipeName;
+                    themedItemDiv.appendChild(nameStrong);
+
+                    const descP = document.createElement('p');
+                    descP.textContent = recipeDesc;
+                    descP.classList.add('text-sm', 'text-gray-600', 'mt-1');
+                    themedItemDiv.appendChild(descP);
+                    
+                    const pButton = document.createElement('p');
+                    pButton.classList.add('mt-2'); 
+                    const button = document.createElement('button');
+                    button.innerHTML = `<i class="fas fa-utensils mr-2"></i> ${applyBoldMarkdown(recipeName)} 레시피 보기`;
+                    button.classList.add('bg-indigo-100', 'hover:bg-indigo-200', 'text-indigo-700', 'font-medium', 'py-1', 'px-2', 'rounded', 'text-xs');
+
+                    button.onclick = () => {
+                        if(UIElements.specificDishNameInput) UIElements.specificDishNameInput.value = recipeName; 
+                        if (UIElements.tabButtons && UIElements.tabContents && UIElements.searchSpecificDishButton) {
+                            UIElements.tabButtons.forEach(btn => btn.classList.remove('active')); 
+                            const tab3Button = document.querySelector('button[data-tab="tab3"]');
+                            if(tab3Button) tab3Button.classList.add('active'); 
+                            UIElements.tabContents.forEach(content => content.classList.remove('active')); 
+                            const tab3Content = document.getElementById('tab3');
+                            if(tab3Content) tab3Content.classList.add('active'); 
+                            if(UIElements.themedRecipesDisplayWrapper) UIElements.themedRecipesDisplayWrapper.classList.add('hidden');
+                            UIElements.searchSpecificDishButton.click(); 
+                        }
+                    };
+                    pButton.appendChild(button);
+                    themedItemDiv.appendChild(pButton);
+                    containerElement.appendChild(themedItemDiv);
+                    return;
+                }
+
+                const sectionTitleRegex = /^(?:(\*\*([^*]+?)\*\*)|([가-힣\w\s()]+?))(?::\s*)?$/;
+                const sectionTitleMatch = processedLine.match(sectionTitleRegex);
+                const currentLineIndex = lines.indexOf(line); 
+                const nextLineIsListItem = (currentLineIndex + 1 < lines.length) && lines[currentLineIndex + 1].trim().match(/^(\d+\.|\*|-)\s/);
+                
+                const isLikelyTitle = sectionTitleMatch && 
+                                    !buttonPatternRegex.test(processedLine) && 
+                                    ( nextLineIsListItem || 
+                                      processedLine.endsWith(':') || 
+                                      currentLineIndex === 0 || 
+                                      (currentLineIndex > 0 && !lines[currentLineIndex-1].trim()) );
+
+                if (isLikelyTitle) {
+                    if (currentList) { containerElement.appendChild(currentList); currentList = null; } 
+                    const h3 = document.createElement('h3');
+                    // content-card 내부의 h3와 구분하기 위해 card-title 클래스 대신 일반 스타일 적용
+                    h3.innerHTML = applyBoldMarkdown((sectionTitleMatch[2] || sectionTitleMatch[3]).trim()); 
+                    h3.classList.add('text-xl', 'font-semibold', 'text-indigo-700', 'mb-3');
+                     if (isFirstTitleInCard && (outputType === "recipe" || outputType === "substitution" || outputType === "nutrition" || outputType === "shoppingList")) { 
+                        // recipeDisplay 내부의 첫 제목은 mt-0, 그 외 (recommendationDisplay 등)는 content-card의 h3 스타일 따름
+                        // card-title 클래스를 recipeOutputTitle에만 적용하고 여기서는 일반 h3 스타일링
+                         h3.classList.add('mt-0'); 
+                         isFirstTitleInCard = false;
+                    } else {
+                        h3.classList.add('mt-5');
+                    }
+                    containerElement.appendChild(h3);
+                    return; 
+                }
+                
+                const listItemRegex = /^(\d+\.|\*|-)\s*(.*)/;
+                const listItemMatch = processedLine.match(listItemRegex);
+                if (listItemMatch) {
+                    const listMarker = listItemMatch[1]; 
+                    let listItemText = listItemMatch[2]; 
+                    const isOrdered = listMarker.match(/^\d+\./); 
+
+                    if (!currentList || (isOrdered && currentList.tagName !== 'OL') || (!isOrdered && currentList.tagName !== 'UL')) {
+                        if (currentList) containerElement.appendChild(currentList); 
+                        currentList = document.createElement(isOrdered ? 'ol' : 'ul'); 
+                        currentList.classList.add('list-inside', 'pl-1', 'space-y-2', 'text-gray-700');
+                        if(isOrdered) currentList.classList.add('list-decimal'); else currentList.classList.add('list-disc');
+                    }
+                    const li = document.createElement('li');
+                    li.innerHTML = applyBoldMarkdown(listItemText); 
+                    currentList.appendChild(li);
+                    return; 
+                }
+                
+                if (currentList) { containerElement.appendChild(currentList); currentList = null; } 
+                const p = document.createElement('p');
+                p.innerHTML = applyBoldMarkdown(processedLine); 
+                p.classList.add('text-gray-700', 'leading-relaxed', 'mb-3');
+                containerElement.appendChild(p);
+            });
+
+            if (currentList) { containerElement.appendChild(currentList); } 
+            
+            // 각 타입에 맞는 wrapper 표시
+            if (outputType === "recommendation" && UIElements.recommendationDisplayWrapper) UIElements.recommendationDisplayWrapper.classList.remove('hidden');
+            else if (outputType === "mealPlan" && UIElements.mealPlanDisplayWrapper) UIElements.mealPlanDisplayWrapper.classList.remove('hidden');
+            else if (outputType === "themedRecipes" && UIElements.themedRecipesDisplayWrapper) UIElements.themedRecipesDisplayWrapper.classList.remove('hidden');
+            else if ((outputType === "recipe" || outputType === "substitution") && UIElements.recipeOutputSection) { // nutrition, shoppingList는 recipeOutputSection 내 다른 div에 표시
+                 UIElements.recipeOutputSection.classList.remove('hidden');
+            } else if (outputType === "nutrition" && UIElements.nutritionAnalysisResultDiv) {
+                 UIElements.nutritionAnalysisResultDiv.classList.remove('hidden');
+                 if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.remove('hidden'); // 부모 섹션도 보이게
+            } else if (outputType === "shoppingList" && UIElements.shoppingListResultDiv) {
+                 UIElements.shoppingListResultDiv.classList.remove('hidden');
+                 if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.remove('hidden'); // 부모 섹션도 보이게
+            }
+            
+            // 스크롤 맨 위로 (내용이 길 경우를 대비)
+            if (containerElement && UIElements.recipeOutputSection && UIElements.recipeOutputSection.contains(containerElement)) {
+                UIElements.recipeOutputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (containerElement) {
+                containerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // 각 버튼 이벤트 리스너 (null 체크 후 할당)
+        if (UIElements.generateRecipeButton) {
+            UIElements.generateRecipeButton.addEventListener('click', async () => {
+                const dietaryPreferencesVal = UIElements.dietaryPreferencesInput ? UIElements.dietaryPreferencesInput.value.trim() : '특별한 제한 없음';
+                const cuisineStyleVal = UIElements.cuisineStyleInput ? UIElements.cuisineStyleInput.value.trim() : '모든 스타일 환영';
+
+                if (dietaryPreferencesVal === '특별한 제한 없음' && cuisineStyleVal === '모든 스타일 환영') {
+                     showError('레시피를 추천받으려면 식단 선호도 또는 요리 스타일 중 하나 이상을 입력해주세요.');
+                     return;
+                }
+                
+                const prompt = `
+당신은 사용자의 입력을 기반으로 맞춤형 레시피를 생성하는 AI 요리 전문가입니다.
+사용자 입력:
+* 식단 선호도/제한사항: ${dietaryPreferencesVal}
+* 선호 요리 스타일: ${cuisineStyleVal}
+
+요청:
+위 정보를 바탕으로, 사용자가 입력한 선호도와 스타일에 맞는 요리를 추천하고 해당 요리에 필요한 모든 재료 목록을 포함하여 레시피 1개를 제안해주세요.
+
+**요리 이름:**
+[AI가 제안하는 요리 이름]
+
+**간단 설명:**
+[요리에 대한 매력적인 2-3문장 설명]
+
+**난이도:**
+[예: 초급 / 중급 / 고급]
+
+**예상 소요 시간:**
+준비: [X분] | 조리: [Y분]
+
+**분량:**
+[Z인분]
+
+**필요한 재료:**
+* [재료 1] - [양] (예: 양파 - 1개)
+* [재료 2] - [양] (예: 다진 마늘 - 1큰술)
+* ... (모든 필요 재료 명시)
+
+**만드는 방법:**
+1. [조리 단계 1 상세 설명]
+2. [조리 단계 2 상세 설명]
+3. ...
+
+**꿀팁 (선택 사항):**
+* [요리를 더 맛있게 만들거나 변형할 수 있는 팁]
+
+결과는 한국어로, 모든 섹션을 포함하여 명확하고 따라하기 쉽게 작성해주세요. 각 섹션 제목은 **굵은 글씨**와 함께 콜론(:)으로 끝나도록 해주세요. (예: **요리 이름:**). 리스트 항목 내에서도 **굵은 글씨** 마크다운을 사용할 수 있습니다.
+                `;
+                const recipeText = await callGeminiAPI(prompt);
+                if (recipeText && UIElements.recipeDisplay) displayFormattedText(recipeText, UIElements.recipeDisplay, "✨ AI 추천 레시피 ✨", "recipe");
+            });
+        }
+
+        if (UIElements.recommendDishButton) {
+            UIElements.recommendDishButton.addEventListener('click', async () => {
+                const keywordsVal = UIElements.whatToEatKeywordsInput ? UIElements.whatToEatKeywordsInput.value.trim() : "특별한 조건 없음";
+                const prompt = `
+사용자가 "오늘 뭐 먹지?" 고민을 하고 있습니다. 다음 키워드를 참고하여, 창의적이고 흥미로운 요리 1가지와 그 요리를 추천하는 간단한 이유를 제안해주세요.
+* 사용자 키워드: ${keywordsVal}
+
+응답 형식:
+**추천 요리:** [요리 이름]
+**추천 이유:** [2-3문장으로 된 매력적인 추천 이유]
+그리고 다음 줄에 정확히 "-> [요리 이름] 전체 레시피 보기" 형식으로 해당 요리의 레시피를 볼 수 있는 버튼 자리표시자를 만들어주세요. 대괄호 안에는 추천한 요리 이름을 정확히 넣어주세요. 이 버튼 자리표시자는 다른 텍스트 없이 단독 라인으로 제공해주세요.
+
+결과는 한국어로 작성해주세요. 각 제목은 **굵은 글씨**와 함께 콜론(:)으로 끝나도록 해주세요.
+                `;
+                const recommendationText = await callGeminiAPI(prompt, true);
+                if (recommendationText && UIElements.recommendationDisplay) displayFormattedText(recommendationText, UIElements.recommendationDisplay, "오늘의 추천", "recommendation");
+            });
+        }
+
+        if (UIElements.searchSpecificDishButton) {
+            UIElements.searchSpecificDishButton.addEventListener('click', async () => {
+                const dishNameVal = UIElements.specificDishNameInput ? UIElements.specificDishNameInput.value.trim() : "";
+
+                // 검색 시작 전, 이전 결과 및 관련 섹션 초기화/숨김
+                if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden');
+                if (UIElements.recipeDisplay) UIElements.recipeDisplay.innerHTML = '<p class="text-gray-500 italic text-center py-8">결과가 여기에 표시됩니다.</p>';
+                if (UIElements.additionalActionsSection) UIElements.additionalActionsSection.classList.add('hidden');
+                if (UIElements.nutritionAnalysisResultDiv) {
+                    UIElements.nutritionAnalysisResultDiv.classList.add('hidden');
+                    UIElements.nutritionAnalysisResultDiv.innerHTML = '';
+                }
+                if (UIElements.shoppingListResultDiv) {
+                    UIElements.shoppingListResultDiv.classList.add('hidden');
+                    UIElements.shoppingListResultDiv.innerHTML = '';
+                }
+                currentRecipeFullText = "";
+
+                if (!dishNameVal) {
+                    showError('검색할 요리 이름을 입력해주세요.');
+                    if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden'); // 확실히 숨김
+                    return;
+                }
+                
+                const prompt = `
+사용자가 "${dishNameVal}" 요리의 레시피를 찾고 있습니다.
+이 요리에 대한 상세한 레시피를 다음 형식에 맞춰 제공해주세요.
+
+**요리 이름:**
+${dishNameVal} (또는 AI가 판단한 정확한 요리 이름)
+
+**간단 설명:**
+[요리에 대한 매력적인 2-3문장 설명]
+
+**난이도:**
+[예: 초급 / 중급 / 고급]
+
+**예상 소요 시간:**
+준비: [X분] | 조리: [Y분]
+
+**분량:**
+[Z인분]
+
+**필요한 재료:**
+* [재료 1] - [양]
+* [재료 2] - [양]
+* ...
+
+**만드는 방법:**
+1. [조리 단계 1 상세 설명]
+2. [조리 단계 2 상세 설명]
+3. ...
+
+**꿀팁 (선택 사항):**
+* [요리를 더 맛있게 만들거나 변형할 수 있는 팁]
+
+결과는 한국어로, 모든 섹션을 포함하여 명확하고 따라하기 쉽게 작성해주세요. 각 섹션 제목은 **굵은 글씨**와 함께 콜론(:)으로 끝나도록 해주세요. 리스트 항목 내에서도 **굵은 글씨** 마크다운을 사용할 수 있습니다.
+                `;
+                const recipeText = await callGeminiAPI(prompt);
+
+                if (recipeText && recipeText.trim() !== "" && UIElements.recipeDisplay) {
+                    displayFormattedText(recipeText, UIElements.recipeDisplay, `✨ "${dishNameVal}" 레시피 ✨`, "recipe");
+                    // recipeOutputSection은 displayFormattedText 내부에서 보이도록 처리됨
+                } else if (recipeText === null) { // API 호출 실패 (showError는 callGeminiAPI에서 이미 처리)
+                    if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden');
+                } else { // API 응답은 성공했으나 내용이 비어있는 경우
+                    showError(`"${dishNameVal}"에 대한 레시피를 찾을 수 없거나 AI 응답이 비어있습니다. 다른 검색어를 사용하거나 잠시 후 다시 시도해 주세요.`);
+                    if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.add('hidden');
+                }
+            });
+        }
+        
+        if (UIElements.generateLeftoverRecipeButton) {
+            UIElements.generateLeftoverRecipeButton.addEventListener('click', async () => {
+                const ingredientsVal = UIElements.leftoverIngredientsInput ? UIElements.leftoverIngredientsInput.value.trim() : "";
+                const cuisineStyleVal = UIElements.leftoverCuisineStyleInput ? UIElements.leftoverCuisineStyleInput.value.trim() : "상관 없음";
+
+                if (!ingredientsVal) {
+                    showError('냉장고 속 재료를 하나 이상 입력해주세요!');
+                    return;
+                }
+                
+                const prompt = `
+당신은 사용자가 제공한 '냉장고 속 재료'를 최대한 활용하여 맛있는 요리를 만드는 AI 요리사입니다. 추가 재료는 최소화하거나, 필요 없을 수도 있습니다.
+사용자 입력:
+* 냉장고 속 재료: ${ingredientsVal}
+* 선호 요리 스타일 (선택 사항): ${cuisineStyleVal}
+
+요청:
+위 '냉장고 속 재료'를 중심으로 하는 레시피 1개를 제안해주세요. 다음 형식을 따라주세요.
+
+**요리 이름:**
+[AI가 제안하는 요리 이름]
+
+**간단 설명:**
+[냉장고 속 재료를 어떻게 활용했는지 강조하는 2-3문장 설명]
+
+**난이도:**
+[예: 초급 / 중급 / 고급]
+
+**예상 소요 시간:**
+준비: [X분] | 조리: [Y분]
+
+**분량:**
+[Z인분]
+
+**필요한 재료:**
+(주로 '냉장고 속 재료'를 사용하며, 만약 아주 약간의 추가 양념/재료가 필요하다면 명시)
+* [재료 1] - [양]
+* ...
+
+**만드는 방법:**
+1. [조리 단계 1 상세 설명]
+2. [조리 단계 2 상세 설명]
+3. ...
+
+**활용 팁 (선택 사항):**
+* [남은 재료를 다르게 활용하거나, 요리를 더 맛있게 하는 팁]
+
+결과는 한국어로, 모든 섹션을 포함하여 명확하고 따라하기 쉽게 작성해주세요. 각 섹션 제목은 **굵은 글씨**와 함께 콜론(:)으로 끝나도록 해주세요. 리스트 항목 내에서도 **굵은 글씨** 마크다운을 사용할 수 있습니다.
+                `;
+                const recipeText = await callGeminiAPI(prompt);
+                if (recipeText && UIElements.recipeDisplay) displayFormattedText(recipeText, UIElements.recipeDisplay, "🌿 냉장고 파먹기 레시피 🌿", "recipe");
+            });
+        }
+
+        if (UIElements.generateMealPlanButton) {
+            UIElements.generateMealPlanButton.addEventListener('click', async () => {
+                const preferences = UIElements.mealPlanPreferencesInput ? UIElements.mealPlanPreferencesInput.value.trim() : "균형 잡힌 일반적인 식단";
+                const prompt = `
+사용자의 다음 요청에 따라 7일치 저녁 식단 아이디어를 요일별(월요일부터 일요일까지)로 제안해주세요.
+각 아이디어는 **"요일: 요리 이름 - 간단한 설명 (1~2줄)"** 형식으로 한 줄에 하나씩 작성해주세요.
+예시:
+월요일: 닭갈비 - 매콤한 양념에 볶아 온 가족이 즐기기 좋은 메뉴
+화요일: 된장찌개 - 구수하고 든든한 한국인의 소울푸드
+
+사용자 요청: "${preferences}"
+`;
+                const mealPlanText = await callGeminiAPI(prompt, true);
+                if (mealPlanText && UIElements.mealPlanDisplay) {
+                    displayFormattedText(mealPlanText, UIElements.mealPlanDisplay, "📅 AI 추천 주간 식단 📅", "mealPlan");
+                }
+            });
+        }
+        
+        if (UIElements.generateThemedRecipesButton) {
+            UIElements.generateThemedRecipesButton.addEventListener('click', async () => {
+                const theme = UIElements.themeKeywordsInput ? UIElements.themeKeywordsInput.value.trim() : "";
+                if (!theme) {
+                    showError('원하는 테마나 상황을 입력해주세요. (예: 생일 파티, 캠핑 요리)');
+                    return;
+                }
+                const prompt = `
+사용자가 다음 테마 또는 상황에 맞는 요리 아이디어 2~3가지를 찾고 있습니다: "${theme}"
+각 요리 아이디어에 대해 **"번호. 요리 이름: 간단한 설명 (1~2줄)"** 형식으로 제안해주세요.
+각 요리 이름 뒤에는 해당 레시피를 검색할 수 있도록 "-> [요리 이름] 전체 레시피 보기" 형식의 버튼 자리표시자를 추가해주세요.
+
+예시:
+테마: "비 오는 날"
+1. 김치전: 바삭하고 매콤한 맛이 일품인 한국의 대표적인 비 오는 날 음식입니다. -> [김치전] 전체 레시피 보기
+2. 해물 칼국수: 따끈하고 시원한 국물에 해물이 듬뿍 들어간 칼국수입니다. -> [해물 칼국수] 전체 레시피 보기
+
+결과는 한국어로 작성해주세요.
+`;
+                const themedRecipesText = await callGeminiAPI(prompt, true);
+                if (themedRecipesText && UIElements.themedRecipesDisplay) {
+                    displayFormattedText(themedRecipesText, UIElements.themedRecipesDisplay, `🎉 "${theme}" 테마 요리 추천 🎉`, "themedRecipes");
+                }
+            });
+        }
+
+        if (UIElements.confirmSubstituteButton) {
+            UIElements.confirmSubstituteButton.addEventListener('click', async () => {
+                const ingredientToSub = UIElements.ingredientToSubstituteInput ? UIElements.ingredientToSubstituteInput.value.trim() : "";
+                const reasonForSub = UIElements.substitutionReasonInput ? UIElements.substitutionReasonInput.value.trim() : "";
+
+                if (!ingredientToSub) {
+                    // 모달 내에서 오류를 직접 표시하거나, 메인 showError를 호출할 수 있습니다.
+                    // 여기서는 모달을 닫지 않고 사용자에게 알리는 것이 더 나을 수 있습니다.
+                    // 간단하게 alert 대신 console.error 또는 모달 내에 작은 오류 메시지 공간을 만들 수 있습니다.
+                    // 지금은 showError를 사용하되, 모달이 닫히는 것을 감수합니다.
+                    showError("대체하고 싶은 재료 이름을 입력해주세요."); 
+                    return;
+                }
+                if (!currentRecipeFullText) {
+                    showError("먼저 레시피를 조회해주세요.");
+                    hideSubstituteModal();
+                    return;
+                }
+
+                hideSubstituteModal(); 
+                
+                let reasonText = "";
+                if (reasonForSub) {
+                    reasonText = `대체하려는 이유는 다음과 같습니다: "${reasonForSub}". `;
+                }
+
+                const prompt = `
+현재 사용자는 다음 레시피를 보고 있습니다:
+--- 레시피 시작 ---
+${currentRecipeFullText}
+--- 레시피 끝 ---
+
+이 레시피에서 "${ingredientToSub}" 재료를 대체할 만한 다른 재료 2~3가지를 추천해주세요. ${reasonText}각 대체 재료에 대해, 사용량은 어떻게 조절해야 하는지, 그리고 대체 시 특별히 주의할 점이나 맛의 변화가 있다면 함께 설명해주세요. 결과는 명확하고 간결하게 목록 형태로 제공해주세요.
+
+예시:
+**"${ingredientToSub}" 대체 재료 추천:**
+* **[대체 재료 1]:** [설명, 양 조절 팁, 주의사항 등]
+* **[대체 재료 2]:** [설명, 양 조절 팁, 주의사항 등]
+`;
+                const substitutionText = await callGeminiAPI(prompt, true);
+                if (substitutionText && UIElements.recipeDisplay) {
+                    displayFormattedText(substitutionText, UIElements.recipeDisplay, `🔄 "${ingredientToSub}" 재료 대체 추천 🔄`, "substitution");
+                }
+            });
+        }
+
+        if (UIElements.analyzeNutritionButton) {
+            UIElements.analyzeNutritionButton.addEventListener('click', async () => {
+                if (!currentRecipeFullText) {
+                    showError("먼저 레시피를 조회하여 영양 정보를 분석할 내용을 준비해주세요.");
+                    return;
+                }
+                 if (!UIElements.nutritionAnalysisResultDiv) { 
+                    console.error("Error: nutritionAnalysisResultDiv is not a valid HTMLElement or is null/undefined.");
+                    showError("영양 정보를 표시할 영역을 찾을 수 없습니다. (앱 내부 오류)");
+                    return;
+                }
+                const prompt = `
+다음 레시피의 주요 영양 정보를 1인분 기준으로 분석해주세요. (만약 레시피에 분량 정보가 있다면 그것을 참고하고, 없다면 일반적인 1인분 기준으로 가정해주세요.)
+예상되는 총 칼로리, 탄수화물(g), 단백질(g), 지방(g) 함량을 알려주고, 가능하다면 나트륨(mg) 정보도 간략히 포함해주세요.
+결과는 명확한 목록 형태로, 각 항목과 수치를 함께 보여주세요. (예: **총 칼로리:** 약 XXX kcal). 각 영양소 뒤에는 단위를 명시해주세요.
+
+--- 레시피 내용 ---
+${currentRecipeFullText}
+--- 레시피 내용 끝 ---
+`;
+                const nutritionText = await callGeminiAPI(prompt, true);
+                if (nutritionText) {
+                    UIElements.nutritionAnalysisResultDiv.innerHTML = ''; 
+                    displayFormattedText(nutritionText, UIElements.nutritionAnalysisResultDiv, "📊 영양 정보 분석 결과 (1인분 기준)", "nutrition"); 
+                }
+            });
+        }
+
+        if (UIElements.generateShoppingListButton) {
+            UIElements.generateShoppingListButton.addEventListener('click', () => {
+                if (!currentRecipeFullText) {
+                    showError("먼저 레시피를 조회하여 장보기 목록을 생성할 내용을 준비해주세요.");
+                    return;
+                }
+                if (!UIElements.shoppingListResultDiv) { 
+                    console.error("Error: shoppingListResultDiv is not a valid HTMLElement or is null/undefined.");
+                    showError("장보기 목록을 표시할 영역을 찾을 수 없습니다. (앱 내부 오류)");
+                    return;
+                }
+
+                const ingredientsSectionRegex = /\*\*필요한 재료:\*\*\s*([\s\S]*?)(?=\n\*\*|$)/i;
+                const match = currentRecipeFullText.match(ingredientsSectionRegex);
+
+                if (match && match[1]) {
+                    const ingredientsText = match[1].trim();
+                    const ingredientsArray = ingredientsText.split('\n').map(item => item.replace(/^\s*\*\s*/, '').trim()).filter(item => item); 
+                    
+                    if (ingredientsArray.length > 0) {
+                        UIElements.shoppingListResultDiv.innerHTML = `
+                            <h3 class="text-lg font-semibold text-indigo-600 mb-3">🛒 장보기 목록</h3>
+                            <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                ${ingredientsArray.map(item => `<li>${applyBoldMarkdown(item)}</li>`).join('')}
+                            </ul>
+                            <button id="copyShoppingListButton" class="action-button mt-4 text-sm">
+                                <i class="fas fa-copy mr-2"></i> 목록 복사하기
+                            </button>
+                        `;
+                        UIElements.shoppingListResultDiv.classList.remove('hidden');
+                        if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.remove('hidden');
+
+
+                        const copyButton = document.getElementById('copyShoppingListButton');
+                        if(copyButton && UIElements.clipboardHelper) { 
+                            copyButton.addEventListener('click', () => {
+                                const listToCopy = ingredientsArray.join('\n');
+                                UIElements.clipboardHelper.value = listToCopy;
+                                UIElements.clipboardHelper.select();
+                                try {
+                                    document.execCommand('copy');
+                                    showError('장보기 목록이 클립보드에 복사되었습니다!'); 
+                                } catch (err) {
+                                    console.error('클립보드 복사 실패:', err);
+                                    showError('클립보드 복사에 실패했습니다. 수동으로 복사해주세요.');
+                                }
+                                if (window.getSelection) {
+                                    window.getSelection().removeAllRanges();
+                                } else if (document.selection) {
+                                    document.selection.empty();
+                                }
+                            });
+                        } else if (!UIElements.clipboardHelper) {
+                             console.warn("clipboardHelper 요소를 찾을 수 없어 복사 기능이 제한됩니다.");
+                        }
+
+                    } else {
+                        UIElements.shoppingListResultDiv.innerHTML = '<p class="text-gray-500 italic">레시피에서 재료 정보를 추출하지 못했습니다.</p>';
+                        UIElements.shoppingListResultDiv.classList.remove('hidden');
+                        if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.remove('hidden');
+                    }
+                } else {
+                    UIElements.shoppingListResultDiv.innerHTML = '<p class="text-gray-500 italic">"필요한 재료" 섹션을 찾을 수 없습니다.</p>';
+                    UIElements.shoppingListResultDiv.classList.remove('hidden');
+                    if (UIElements.recipeOutputSection) UIElements.recipeOutputSection.classList.remove('hidden');
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

@@ -30,21 +30,21 @@
         }
         .tab-button {
             transition: all 0.25s ease-in-out;
-            border-bottom: 3px solid transparent; /* 기본 밑줄은 투명 */
+            border-bottom: 3px solid transparent; 
             padding-top: 0.6rem;
-            padding-bottom: 0.6rem; /* 기본 하단 패딩 */
+            padding-bottom: 0.6rem; 
             padding-left: 0.5rem;
             padding-right: 0.5rem; 
             white-space: nowrap; 
             display: inline-flex; 
             align-items: center;
             font-size: 0.8rem; 
-            line-height: 1.2; /* 텍스트와 밑줄 사이 간격 조정을 위해 추가 */
+            line-height: 1.2; 
         }
         @media (min-width: 768px) { 
             .tab-button {
                 padding-top: 0.85rem;
-                padding-bottom: 0.85rem; /* 데스크탑 기본 하단 패딩 */
+                padding-bottom: 0.85rem; 
                 padding-left: 0.7rem;
                 padding-right: 0.7rem;
                 font-size: 0.875rem; 
@@ -56,23 +56,15 @@
         }
         .tab-button.active {
             color: #4f46e5; 
-            border-bottom-color: #4f46e5; /* 활성 탭 밑줄 색상 */
+            border-bottom-color: #4f46e5; 
             font-weight: 700;
-            /* 밑줄이 텍스트에 더 가깝게 보이도록 패딩 조정 */
-            /* padding-bottom 값에서 border-bottom-width (3px) 만큼 빼줍니다. */
-            /* Tailwind의 기본 패딩 값과 계산을 맞추기 위해 calc 사용 대신 직접 값을 조정합니다. */
-            /* 예: 0.6rem (9.6px) - 3px = 6.6px. Tailwind는 rem 단위를 사용하므로, 
-               정확한 계산보다는 시각적으로 조정하는 것이 나을 수 있습니다.
-               또는, border를 box-shadow로 대체하는 방법도 있습니다.
-               여기서는 padding-bottom을 직접 조정합니다. */
         }
-         /* 활성 탭의 하단 패딩을 더 줄여 밑줄을 올립니다. */
         .tab-button.active {
-            padding-bottom: calc(0.6rem - 3px); /* 모바일: 기본 패딩 - 밑줄 두께 */
+            padding-bottom: calc(0.6rem - 3px); 
         }
         @media (min-width: 768px) {
             .tab-button.active {
-                padding-bottom: calc(0.85rem - 3px); /* 데스크탑: 기본 패딩 - 밑줄 두께 */
+                padding-bottom: calc(0.85rem - 3px); 
             }
         }
 
@@ -188,26 +180,57 @@
         #copyShoppingListButton:hover {
             background-color: #4b5563; 
         }
-        /* 네비게이션 그룹 제목 스타일 수정 */
+        
         .nav-group-title {
-            font-size: 0.8rem; 
-            color: #4b5563; 
-            text-align: left; 
-            padding-left: 0.5rem; 
-            margin-top: 0.75rem; /* 그룹 간 상단 간격 */
-            margin-bottom: 0.25rem; 
-            font-weight: 600; 
+            font-size: 0.75rem; /* text-xs */
+            color: #4b5563; /* text-gray-600 */
+            text-align: left;
+            padding-left: 0.25rem; /* pl-1 */
+            margin-top: 0.75rem; /* mt-3 */
+            margin-bottom: 0.125rem; /* mb-0.5 */
+            font-weight: 600; /* semibold */
         }
-        #mainNavContainer > .nav-group-title:first-of-type { /* 첫번째 그룹 제목의 상단 마진 제거 */
+        /* 데스크탑에서 첫번째 그룹 타이틀의 상단 마진 제거 */
+        #mainNavContainer > .nav-group-for-desktop:first-child > .nav-group-title {
              margin-top: 0;
         }
-        #additionalTabs > .nav-group-title { /* 추가 탭 내의 그룹 제목 상단 마진 */
-            margin-top: 0.75rem; /* md:mt-3 와 유사하게 */
+        
+        /* 모바일에서 추가 메뉴가 열렸을 때의 스타일 */
+        @media (max-width: 767px) { /* md 미만 */
+            #additionalTabsContainer.mobile-menu-open {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.25rem; /* gap-1 */
+                margin-top: 0.5rem; /* mt-2 */
+                padding-top: 0.5rem; /* py-2 */
+                padding-bottom: 0.5rem;
+                border-top: 1px solid #e5e7eb; /* border-gray-200 */
+            }
+            #additionalTabsContainer.mobile-menu-open .nav-group-for-desktop {
+                display: contents; /* 이 div는 레이아웃에 영향을 주지 않고 자식들(버튼 그룹)을 grid 아이템으로 만듦 */
+            }
+             #additionalTabsContainer.mobile-menu-open .nav-group-title {
+                display: none; /* 모바일 그리드에서는 그룹 제목 숨김 */
+            }
+            #additionalTabsContainer.mobile-menu-open .additional-tabs-group-content {
+                 display: contents; /* 이 div도 레이아웃에 영향을 주지 않고 버튼들을 grid 아이템으로 만듦 */
+            }
+            #additionalTabsContainer.mobile-menu-open .tab-button.additional-tab {
+                width: 100%;
+                flex-direction: column; /* 아이콘과 텍스트 세로 정렬 */
+                justify-content: center;
+                align-items: center;
+                padding: 0.5rem 0.25rem; /* 버튼 내부 패딩 조정 */
+                font-size: 0.7rem; /* 모바일 버튼 폰트 크기 */
+                text-align: center;
+                height: auto; /* 높이 자동 조정 */
+                min-height: 50px; /* 최소 높이 설정 */
+            }
+            #additionalTabsContainer.mobile-menu-open .tab-button.additional-tab i {
+                margin-right: 0;
+                margin-bottom: 0.125rem; /* 아이콘과 텍스트 사이 간격 */
+            }
         }
-         #additionalTabs > .nav-group-title:first-child { /* 추가 탭 내의 첫 그룹 제목 상단 마진도 동일하게 */
-            margin-top: 0.75rem;
-        }
-
 
     </style>
 </head>
@@ -229,7 +252,7 @@
             </div>
 
             <div id="mainNavContainer" class="border-b border-gray-200 pb-1 md:pb-2">
-                <div class="nav-group-title">레시피 탐색</div>
+                <div class="nav-group-title hidden md:block">레시피 탐색</div>
                 <div id="coreTabs" class="flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2">
                     <button data-tab="tab2" class="tab-button core-tab active"> 
                         <i class="fas fa-hat-chef"></i>오늘의 추천
@@ -247,50 +270,32 @@
                     </button>
                 </div>
 
-                <div id="additionalTabs" class="hidden md:block"> 
-                    <div class="nav-group-title">주방 도구</div>
-                    <div class="flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2">
-                        <button data-tab="tab4" class="tab-button additional-tab">
-                            <i class="fas fa-carrot"></i>냉장고 파먹기
-                        </button>
-                        <button data-tab="tab7" class="tab-button additional-tab">
-                            <i class="fas fa-wine-glass"></i>음료 추천
-                        </button>
-                        <button data-tab="tab8" class="tab-button additional-tab">
-                            <i class="fas fa-book-open"></i>요리 용어
-                        </button>
-                        <button data-tab="tab9" class="tab-button additional-tab">
-                            <i class="fas fa-balance-scale"></i>단위 변환
-                        </button>
+                <div id="additionalTabsContainer" class="hidden md:block mt-2 md:mt-0 md:pt-0">
+                    <div class="nav-group-for-desktop">
+                        <div class="nav-group-title hidden md:block">주방 도구</div>
+                        <div class="additional-tabs-group-content flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2 md:mb-2">
+                            <button data-tab="tab4" class="tab-button additional-tab"> <i class="fas fa-carrot"></i>냉장고 파먹기 </button>
+                            <button data-tab="tab7" class="tab-button additional-tab"> <i class="fas fa-wine-glass"></i>음료 추천 </button>
+                            <button data-tab="tab8" class="tab-button additional-tab"> <i class="fas fa-book-open"></i>요리 용어 </button>
+                            <button data-tab="tab9" class="tab-button additional-tab"> <i class="fas fa-balance-scale"></i>단위 변환 </button>
+                        </div>
                     </div>
-                    
-                    <div class="nav-group-title">헬스 플래너(베타)</div>
-                    <div class="flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2">
-                         <button data-tab="tab12" class="tab-button additional-tab">
-                            <i class="fas fa-calculator"></i>칼로리 트래커
-                        </button>
-                        <button data-tab="tab13" class="tab-button additional-tab">
-                            <i class="fas fa-utensils"></i>AI 다이어트 플랜
-                        </button>
-                        <button data-tab="tab14" class="tab-button additional-tab">
-                            <i class="fas fa-dumbbell"></i>운동 도우미
-                        </button>
-                        <button data-tab="tab15" class="tab-button additional-tab">
-                            <i class="fas fa-tint"></i>수분 트래커
-                        </button>
-                        <button data-tab="tab16" class="tab-button additional-tab">
-                            <i class="fas fa-lightbulb"></i>오늘의 다이어트 팁
-                        </button>
+                    <div class="nav-group-for-desktop">
+                        <div class="nav-group-title hidden md:block">헬스 플래너(베타)</div>
+                        <div class="additional-tabs-group-content flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2 md:mb-2">
+                             <button data-tab="tab12" class="tab-button additional-tab"> <i class="fas fa-calculator"></i>칼로리 트래커 </button>
+                            <button data-tab="tab13" class="tab-button additional-tab"> <i class="fas fa-utensils"></i>AI 다이어트 플랜 </button>
+                            <button data-tab="tab14" class="tab-button additional-tab"> <i class="fas fa-dumbbell"></i>운동 도우미 </button>
+                            <button data-tab="tab15" class="tab-button additional-tab"> <i class="fas fa-tint"></i>수분 트래커 </button>
+                            <button data-tab="tab16" class="tab-button additional-tab"> <i class="fas fa-lightbulb"></i>오늘의 다이어트 팁 </button>
+                        </div>
                     </div>
-
-                    <div class="nav-group-title">나의 공간</div>
-                    <div class="flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2">
-                        <button data-tab="tab5" class="tab-button additional-tab">
-                            <i class="fas fa-calendar-alt"></i>AI 주간 식단
-                        </button>
-                        <button data-tab="tab11" class="tab-button additional-tab">
-                            <i class="fas fa-bookmark"></i>내 레시피북
-                        </button>
+                    <div class="nav-group-for-desktop">
+                        <div class="nav-group-title hidden md:block">나의 공간</div>
+                        <div class="additional-tabs-group-content flex flex-wrap justify-center md:justify-start items-center gap-x-1 gap-y-1 md:gap-y-2">
+                            <button data-tab="tab5" class="tab-button additional-tab"> <i class="fas fa-calendar-alt"></i>AI 주간 식단 </button>
+                            <button data-tab="tab11" class="tab-button additional-tab"> <i class="fas fa-bookmark"></i>내 레시피북 </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -695,7 +700,7 @@
         UIElements.tabContents = document.querySelectorAll('.tab-content');
         UIElements.mobileMoreMenuButton = document.getElementById('mobileMoreMenuButton');
         UIElements.coreTabsContainer = document.getElementById('coreTabs'); 
-        UIElements.additionalTabsContainer = document.getElementById('additionalTabs'); 
+        UIElements.additionalTabsContainer = document.getElementById('additionalTabsContainer'); // 수정된 ID
 
         UIElements.dietaryPreferencesInput = document.getElementById('dietaryPreferences');
         UIElements.cuisineStyleInput = document.getElementById('cuisineStyle');
@@ -810,18 +815,38 @@
         // 모바일 "더보기" 메뉴 토글
         if (UIElements.mobileMoreMenuButton && UIElements.additionalTabsContainer) {
             UIElements.mobileMoreMenuButton.addEventListener('click', () => {
-                const isHidden = UIElements.additionalTabsContainer.classList.contains('hidden');
+                const container = UIElements.additionalTabsContainer;
+                const isHidden = container.classList.contains('hidden');
                 const buttonTextEl = UIElements.mobileMoreMenuButton.querySelector('#mobileMoreMenuButtonText');
                 const iconEl = UIElements.mobileMoreMenuButton.querySelector('#mobileMoreMenuIcon');
 
                 if (isHidden) {
-                    UIElements.additionalTabsContainer.classList.remove('hidden');
-                    UIElements.additionalTabsContainer.classList.add('grid', 'grid-cols-3', 'sm:grid-cols-4', 'gap-x-1', 'gap-y-2', 'mt-2', 'py-2', 'border-t', 'border-gray-200');
+                    container.classList.remove('hidden', 'md:block');
+                    container.classList.add('mobile-menu-open', 'grid', 'grid-cols-3', 'gap-1', 'p-2', 'border-t'); // 모바일 그리드 스타일
+                    // 모바일에서는 그룹 제목 숨기기
+                    container.querySelectorAll('.nav-group-title').forEach(title => title.classList.add('hidden'));
+                    // 버튼 스타일 조정
+                    container.querySelectorAll('.tab-button.additional-tab').forEach(btn => {
+                         btn.classList.add('flex-col', 'items-center', 'text-center', 'p-1', 'text-xs');
+                         btn.querySelector('i').classList.add('mb-0.5');
+                    });
+
                     if(buttonTextEl) buttonTextEl.textContent = "메뉴 접기";
                     if(iconEl) iconEl.classList.replace('fa-chevron-down', 'fa-chevron-up');
                 } else {
-                    UIElements.additionalTabsContainer.classList.add('hidden');
-                    UIElements.additionalTabsContainer.classList.remove('grid', 'grid-cols-3', 'sm:grid-cols-4', 'gap-x-1', 'gap-y-2', 'mt-2', 'py-2', 'border-t', 'border-gray-200');
+                    container.classList.add('hidden');
+                    container.classList.remove('mobile-menu-open', 'grid', 'grid-cols-3', 'gap-1', 'p-2', 'border-t');
+                    container.classList.add('md:block'); // 데스크탑에서는 보이도록 복원
+                     // 모바일용 버튼 스타일 원복 (필요시)
+                    container.querySelectorAll('.tab-button.additional-tab').forEach(btn => {
+                        btn.classList.remove('flex-col', 'items-center', 'text-center', 'p-1', 'text-xs');
+                        const icon = btn.querySelector('i');
+                        if(icon) icon.classList.remove('mb-0.5');
+                    });
+                    // 데스크탑용 그룹 제목 다시 보이게 (CSS로 md:block 처리되어 있으므로 JS에서 특별히 안해도 될 수 있음)
+                    container.querySelectorAll('.nav-group-title').forEach(title => title.classList.remove('hidden'));
+
+
                     if(buttonTextEl) buttonTextEl.textContent = "더 많은 메뉴 보기";
                     if(iconEl) iconEl.classList.replace('fa-chevron-up', 'fa-chevron-down');
                 }
@@ -875,9 +900,10 @@
 
 
                     // 모바일에서 추가 메뉴의 탭 선택 후 "더보기" 메뉴 닫기
-                    if (window.innerWidth < 768 && UIElements.additionalTabsContainer && !UIElements.additionalTabsContainer.classList.contains('hidden') && button.classList.contains('additional-tab')) {
+                    if (window.innerWidth < 768 && UIElements.additionalTabsContainer && UIElements.additionalTabsContainer.classList.contains('mobile-menu-open') && button.classList.contains('additional-tab')) {
                         UIElements.additionalTabsContainer.classList.add('hidden');
-                        UIElements.additionalTabsContainer.classList.remove('grid', 'grid-cols-3', 'sm:grid-cols-4', 'gap-x-1', 'gap-y-2', 'mt-2', 'py-2', 'border-t', 'border-gray-200');
+                        UIElements.additionalTabsContainer.classList.remove('mobile-menu-open','grid', 'grid-cols-3', 'gap-1', 'p-2', 'border-t');
+                        UIElements.additionalTabsContainer.classList.add('md:block');
                         const buttonTextEl = UIElements.mobileMoreMenuButton.querySelector('#mobileMoreMenuButtonText');
                         const iconEl = UIElements.mobileMoreMenuButton.querySelector('#mobileMoreMenuIcon');
                         if(buttonTextEl) buttonTextEl.textContent = "더 많은 메뉴 보기";
@@ -1888,9 +1914,8 @@ ${currentRecipeFullText}
         
         // 초기 로드 시 "오늘의 추천" 탭 활성화
         const defaultInitialTabId = 'tab2';
-        // 이전에 선언된 initialActiveTabButton 변수를 재사용하지 않도록 let 또는 const를 다시 사용하지 않습니다.
-        let initialActiveTabButtonForLoad = document.querySelector(`.tab-button[data-tab="${defaultInitialTabId}"]`);
-        let initialActiveTabContentForLoad = document.getElementById(defaultInitialTabId);
+        const initialActiveTabButton = document.querySelector(`.tab-button[data-tab="${defaultInitialTabId}"]`); 
+        const initialActiveTabContent = document.getElementById(defaultInitialTabId);
 
         // 모든 탭에서 'active' 클래스 먼저 제거
         if (UIElements.tabButtons) {
@@ -1900,22 +1925,22 @@ ${currentRecipeFullText}
             UIElements.tabContents.forEach(content => content.classList.remove('active'));
         }
 
-        if (initialActiveTabButtonForLoad && initialActiveTabContentForLoad) {
-            initialActiveTabButtonForLoad.classList.add('active');
-            initialActiveTabContentForLoad.classList.add('active');
+        if (initialActiveTabButton && initialActiveTabContent) {
+            initialActiveTabButton.classList.add('active');
+            initialActiveTabContent.classList.add('active');
         } else if (UIElements.tabButtons && UIElements.tabButtons.length > 0) { // Fallback: 첫 번째 탭 활성화
             UIElements.tabButtons[0].classList.add('active');
             const fallbackTabId = UIElements.tabButtons[0].dataset.tab;
             const fallbackContent = document.getElementById(fallbackTabId);
             if (fallbackContent) {
                 fallbackContent.classList.add('active');
-                initialActiveTabButtonForLoad = UIElements.tabButtons[0]; 
             }
         }
         
-        // 초기 활성화된 탭에 따른 데이터 로드 (initialActiveTabButtonForLoad 변수 사용)
-        if (initialActiveTabButtonForLoad) { 
-            const activeTab = initialActiveTabButtonForLoad.dataset.tab;
+        // 초기 활성화된 탭에 따른 데이터 로드 (변수 이름 충돌 방지)
+        const currentActiveTabButtonOnLoad = document.querySelector('.tab-button.active'); // 여기서 다시 가져옴
+        if (currentActiveTabButtonOnLoad) { 
+            const activeTab = currentActiveTabButtonOnLoad.dataset.tab;
             if (activeTab === 'tab11') loadAndDisplaySavedRecipes();
             if (activeTab === 'tab12') loadDailyCalorieLog();
             if (activeTab === 'tab14') loadDailyExerciseLog();

@@ -1,0 +1,17 @@
+# Local environment files — NEVER commit real API keys
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel
+
+# Dependencies / build output
+node_modules
+dist
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea

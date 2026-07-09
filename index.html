@@ -981,7 +981,7 @@
         async function callGeminiAPI(prompt, isAuxiliaryAction = false) {
             setLoading(true, isAuxiliaryAction ? "AI가 정보를 처리 중입니다..." : "최고의 레시피를 구상 중...");
             
-            const API_ENDPOINT = "https://magenta-morning-find.glitch.me/generate"; 
+            const API_ENDPOINT = "/api/generate";
             const payload = { message: prompt };
             
             try {

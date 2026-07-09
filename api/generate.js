@@ -10,6 +10,25 @@
 const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 const DEFAULT_MODEL = "gemma-4-31b-it";
 
+// gemma-style models tend to "think out loud" — echoing the request, listing a
+// Goal / Response Format, and self-checking with "(Check)" — before the real
+// answer. This directive (the same trick koreaplanner uses to tame the model)
+// forces a clean final answer. Gemma on the Gemini API does not accept a
+// systemInstruction, so we prepend the rules to the user text instead.
+const OUTPUT_DIRECTIVE = [
+  "당신은 사용자에게 최종 결과만 보여주는 도우미입니다. 아래 [요청]을 처리하되 다음 규칙을 반드시 지키세요.",
+  "- 요청이 지정한 형식의 최종 결과만 한국어로 출력합니다.",
+  "- 당신의 생각·추론·계획 과정을 절대 출력하지 마세요.",
+  "- 요청 내용이나 형식 지침을 다시 설명하거나 반복하지 마세요.",
+  '- "User input", "Goal", "Response Format", "(Check)" 같은 메타 텍스트나 자기 점검 목록을 출력하지 마세요.',
+  "- 서론·맺음말 없이 곧바로 최종 답변부터 시작하세요.",
+  "- 요청에서 요구한 굵은 글씨(**) 등 서식은 그대로 사용하세요.",
+].join("\n");
+
+function wrapPrompt(prompt) {
+  return `${OUTPUT_DIRECTIVE}\n\n---\n[요청]\n${prompt}`;
+}
+
 // Best-effort in-memory rate limiter. It only survives within a warm serverless
 // instance, but still blunts casual abuse of the paid AI endpoint.
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -93,7 +112,7 @@ module.exports = async function handler(req, res) {
         "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        contents: [{ role: "user", parts: [{ text: wrapPrompt(prompt) }] }],
         generationConfig: { temperature, maxOutputTokens },
       }),
     });

@@ -1118,7 +1118,7 @@
                 let processedLine = line.trim();
                 if (!processedLine) return; 
 
-                const buttonPatternRegex = /(?:->\s*)?(?:\[|\uFF3B)([^\]\uFF3D]+?)(?:\]|\uFF3D)\s*전체 레시피 보기/;
+                const buttonPatternRegex = /^\s*(?:->|\u2192|>|\u2022|\*|-)?\s*(?:\[|\uFF3B)?([^\[\]\uFF3B\uFF3D\n]+?)(?:\]|\uFF3D)?\s*전체\s*레시피\s*보기\s*$/;
                 if ((outputType === "recommendation" || outputType === "themedRecipes" || outputType === "seasonalRecipe") && buttonPatternRegex.test(processedLine)) {
                     const dishNameMatch = processedLine.match(buttonPatternRegex);
                     if (dishNameMatch && dishNameMatch[1]) {

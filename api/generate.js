@@ -8,7 +8,7 @@
 // This replaces the old Glitch proxy (magenta-morning-find.glitch.me).
 
 const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_MODEL = "gemma-4-31b-it";
 
 // Best-effort in-memory rate limiter. It only survives within a warm serverless
 // instance, but still blunts casual abuse of the paid AI endpoint.

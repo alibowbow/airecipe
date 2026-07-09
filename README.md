@@ -18,7 +18,7 @@ AI 셰프가 레시피·식단·영양 정보를 생성해주는 단일 페이�
 1. 이 저장소를 Vercel에 임포트합니다. (빌드 과정 없는 정적 사이트 + `api/` 서버리스 함수로 자동 인식됩니다.)
 2. Vercel 프로젝트 → **Settings → Environment Variables** 에 다음을 추가합니다:
    - `GEMINI_API_KEY` — Google AI Studio 키 (https://aistudio.google.com/apikey)
-   - (선택) `GEMINI_MODEL` — 기본값 `gemini-2.5-flash`
+   - (선택) `GEMINI_MODEL` — 기본값 `gemma-4-31b-it`
    - Environments: **Production** 과 **Preview** 모두 체크
 3. 배포하면 끝. `index.html` 은 정적으로 서빙되고 `/api/generate` 는 함수로 동작합니다.
 

@@ -1270,16 +1270,15 @@
         async function onRecommendDish() {
             const kwRaw = UIElements.whatToEatKeywords.value.trim();
             const keywords = kwRaw || "특별한 조건 없음";
-            // gemma tends to always fall back to the same "safe fancy" dish
-            // (e.g. 트러플 리조또). Seed each request with a random inspiration so
-            // the recommendation actually varies each time.
+            // Random inspiration keeps gemma from always defaulting to the same
+            // dish. Embed it as a direct request rather than "avoid X" meta rules,
+            // because gemma tends to narrate any rules it is told to follow.
             const rndPick = (arr) => arr[Math.floor(Math.random() * arr.length)];
             const inspiration = `${rndPick(["한식","중식","일식","이탈리안","멕시칸","태국","인도","프랑스","베트남","분식","가정식","퓨전","지중해식"])} · ${rndPick(["따뜻한 국물","가벼운 한 끼","든든한 밥요리","매콤한","새콤달콤한","고소한","담백한","바삭한","간단한","보양식","술안주","해장"])} · ${rndPick(["면","밥","빵","두부","달걀","닭","돼지고기","소고기","해산물","채소","버섯","감자","김치"])} 계열`;
-            const seed = Math.floor(Math.random() * 100000);
-            const buttonRule = `응답 맨 아래 줄에 정확히 "-> [요리 이름] 전체 레시피 보기" 형식으로 버튼 자리표시자를 만들어주세요. 대괄호 안에는 추천한 요리 이름을 정확히 넣어주세요. 이 버튼 자리표시자는 다른 텍스트 없이 단독 라인으로 제공해주세요.`;
+            const buttonRule = `마지막 줄은 반드시 "-> [요리 이름] 전체 레시피 보기" 형식으로만 작성해줘.`;
             const prompt = kwRaw
-                ? `사용자가 "오늘 뭐 먹지?" 고민 중입니다. 키워드: "${kwRaw}". 키워드에 어울리는 특별한 요리 1가지를 추천하고 미식가다운 추천 이유를 3줄 내외로 작성해주세요. 매번 서로 다른 요리를 추천하고, 트러플·리조또처럼 뻔한 선택을 반복하지 마세요. (다양성 시드 ${seed})\n${buttonRule}`
-                : `사용자가 "오늘 뭐 먹지?" 고민 중이고 특별한 조건은 없습니다. 아래 '오늘의 영감'에서 힌트를 얻어 특별한 요리 1가지를 추천하고 미식가다운 추천 이유를 3줄 내외로 작성해주세요.\n오늘의 영감: ${inspiration}\n중요: 매번 서로 다른 요리를 추천하고, 트러플·리조또처럼 뻔한 선택은 절대 반복하지 마세요. (다양성 시드 ${seed})\n${buttonRule}`;
+                ? `"${kwRaw}" 느낌의 특별한 요리 한 가지를 추천하고, 미식가다운 추천 이유를 3줄로 써줘. ${buttonRule}`
+                : `${inspiration}의 특별한 요리 한 가지를 추천하고, 미식가다운 추천 이유를 3줄로 써줘. ${buttonRule}`;
             const result = await getAIResponse(prompt, "recommendation", keywords);
             if (result.text) displayFormattedText(result.text, UIElements.recommendationDisplay, "오늘의 추천 요리", "recommendation");
         }

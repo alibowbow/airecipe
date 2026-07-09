@@ -21,25 +21,43 @@ const SYSTEM_INSTRUCTION =
   "request, never write your analysis, plan, requirements, or self-check lists, " +
   "and add no preface or closing. Preserve any requested markdown such as bold.";
 
-// Safety net only. If a model still leaks planning ("Requirements:", English meta
-// bullets) or a self-check list ("... ? Yes."), drop those lines. It never
-// removes Korean content or the recipe button line, so it is a no-op on clean
-// output.
+// Strip a model's leaked reasoning and its duplicated draft. gemma sometimes
+// dumps an English/mixed planning block (User query / Conditions / Common
+// choices / a "? Yes" or "(Check)" list / a draft answer) and then repeats the
+// real answer at the end. When we see several such "reasoning markers", keep
+// only what follows the LAST one — the final clean answer. Otherwise do a light
+// pass that just drops stray marker lines. JSON payloads (nutrition) and clean
+// output pass through untouched. A marker requires an explicit English meta
+// label or a yes/no self-check, so real recipe lines (incl. English ingredient
+// names) are never mistaken for reasoning.
 function sanitizeModelText(text) {
   if (!text) return text;
-  const hasKorean = (s) => /[가-힣]/.test(s);
-  const checklistRe = /\?\s*(yes|no)\.?$/i;
-  const engMetaRe = /^(?:[-*•]\s*)?(?:user\b|keywords?\b|role\b|requirements?\b|constraints?\b|format\b|language\b|style\b|output only\b|no (?:thinking|reasoning|planning|meta|intro|outro)\b|recommend \d|provide\b|last line\b|response format\b|task\b|goal\b|instruction\b|dish\b|reason\b|button\b|note\b|step \d)\b/i;
-  const kept = text.split("\n").filter((line) => {
-    const t = line.trim();
-    if (!t) return true;
-    if (t.includes("전체 레시피 보기")) return true; // keep the button line
-    if (hasKorean(t)) return true;                    // keep all Korean content
-    if (checklistRe.test(t)) return false;
-    if (engMetaRe.test(t)) return false;
-    return true;
-  });
-  return kept.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  const trimmed = text.trim();
+  if (/^[[{]/.test(trimmed) || /^```/.test(trimmed)) return text; // leave JSON alone
+
+  const hangul = (s) => (s.match(/[가-힣]/g) || []).length;
+  const metaPrefix = /^(?:[-*•\d.]+\s*)?(?:user\b|query\b|conditions?\b|inspiration\b|recommendation\b|reason\b|dish\b|bottom line\b|button\b|note\b|common choices?\b|more (?:unique|special)\b|avoid\b|response format\b|last line\b|no (?:preface|analysis|closing|thinking|reasoning|planning|meta|intro|outro)\b|okay\b|here'?s\b)/i;
+  const checklist = /(\?\s*(yes|no)\b|\(check\))/i;
+
+  const isMarker = (t) => {
+    if (!t) return false;
+    if (t.includes("전체 레시피 보기")) {
+      return metaPrefix.test(t) || t.includes("[Dish Name]") || t.includes("[요리 이름]");
+    }
+    return checklist.test(t) || (metaPrefix.test(t) && hangul(t) < 8);
+  };
+
+  const lines = text.split("\n");
+  const markers = [];
+  lines.forEach((l, i) => { if (isMarker(l.trim())) markers.push(i); });
+
+  if (markers.length >= 2) {
+    const tail = lines.slice(markers[markers.length - 1] + 1);
+    if (tail.some((l) => hangul(l) > 0)) {
+      return tail.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+    }
+  }
+  return lines.filter((l) => !isMarker(l.trim())).join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 // Best-effort in-memory rate limiter. It only survives within a warm serverless

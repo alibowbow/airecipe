@@ -10,23 +10,36 @@
 const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 const DEFAULT_MODEL = "gemma-4-31b-it";
 
-// gemma-style models tend to "think out loud" — echoing the request, listing a
-// Goal / Response Format, and self-checking with "(Check)" — before the real
-// answer. This directive (the same trick koreaplanner uses to tame the model)
-// forces a clean final answer. Gemma on the Gemini API does not accept a
-// systemInstruction, so we prepend the rules to the user text instead.
-const OUTPUT_DIRECTIVE = [
-  "당신은 사용자에게 최종 결과만 보여주는 도우미입니다. 아래 [요청]을 처리하되 다음 규칙을 반드시 지키세요.",
-  "- 요청이 지정한 형식의 최종 결과만 한국어로 출력합니다.",
-  "- 당신의 생각·추론·계획 과정을 절대 출력하지 마세요.",
-  "- 요청 내용이나 형식 지침을 다시 설명하거나 반복하지 마세요.",
-  '- "User input", "Goal", "Response Format", "(Check)" 같은 메타 텍스트나 자기 점검 목록을 출력하지 마세요.',
-  "- 서론·맺음말 없이 곧바로 최종 답변부터 시작하세요.",
-  "- 요청에서 요구한 굵은 글씨(**) 등 서식은 그대로 사용하세요.",
-].join("\n");
+// Keep the "answer only, no commentary" rule in the SYSTEM instruction, NOT in
+// the user prompt. gemma echoes rules it finds in the user turn (it will happily
+// recite "Output only the final result / No reasoning..." and run a self-check
+// list), but it follows a systemInstruction silently — the same approach that
+// keeps gemma clean in koreaplanner. So we never touch the user's prompt.
+const SYSTEM_INSTRUCTION =
+  "You are a precise Korean culinary assistant. Reply in Korean and follow the " +
+  "requested format exactly. Output ONLY the final result: never restate the " +
+  "request, never write your analysis, plan, requirements, or self-check lists, " +
+  "and add no preface or closing. Preserve any requested markdown such as bold.";
 
-function wrapPrompt(prompt) {
-  return `${OUTPUT_DIRECTIVE}\n\n---\n[요청]\n${prompt}`;
+// Safety net only. If a model still leaks planning ("Requirements:", English meta
+// bullets) or a self-check list ("... ? Yes."), drop those lines. It never
+// removes Korean content or the recipe button line, so it is a no-op on clean
+// output.
+function sanitizeModelText(text) {
+  if (!text) return text;
+  const hasKorean = (s) => /[가-힣]/.test(s);
+  const checklistRe = /\?\s*(yes|no)\.?$/i;
+  const engMetaRe = /^(?:[-*•]\s*)?(?:user\b|keywords?\b|role\b|requirements?\b|constraints?\b|format\b|language\b|style\b|output only\b|no (?:thinking|reasoning|planning|meta|intro|outro)\b|recommend \d|provide\b|last line\b|response format\b|task\b|goal\b|instruction\b|dish\b|reason\b|button\b|note\b|step \d)\b/i;
+  const kept = text.split("\n").filter((line) => {
+    const t = line.trim();
+    if (!t) return true;
+    if (t.includes("전체 레시피 보기")) return true; // keep the button line
+    if (hasKorean(t)) return true;                    // keep all Korean content
+    if (checklistRe.test(t)) return false;
+    if (engMetaRe.test(t)) return false;
+    return true;
+  });
+  return kept.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 // Best-effort in-memory rate limiter. It only survives within a warm serverless
@@ -112,7 +125,8 @@ module.exports = async function handler(req, res) {
         "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: wrapPrompt(prompt) }] }],
+        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: { temperature, maxOutputTokens },
       }),
     });
@@ -136,7 +150,7 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const text = extractText(payload);
+    const text = sanitizeModelText(extractText(payload));
     if (!text) {
       return res.status(502).json({
         error: "Empty model response",

@@ -1029,7 +1029,7 @@
             const keywords = searchKeywords || prompt;
             
             if (category === "recipe") {
-                let dishName = "트러플 버터 소스의 프라임 안심 수비드 스테이크";
+                let dishName = ["간장 버터 감자조림", "매콤 제육볶음", "새우 로제 파스타", "두부 김치찌개", "허브 로스트 치킨", "가지 덮밥"][Math.floor(Math.random() * 6)];
                 if (keywords.includes("봉골레") || keywords.includes("파스타") || keywords.includes("면")) {
                     dishName = "엑스트라버진 에멀전 에이징 봉골레 파스타";
                 } else if (keywords.includes("삼겹살") || keywords.includes("고기")) {
@@ -1067,9 +1067,15 @@
             }
 
             if (category === "recommendation") {
-                let rec = "로즈마리 아로마 에멀전 모시조개 파스타";
+                const recPool = [
+                    "들기름 막국수", "가지 두부 스테이크", "매콤 오징어 덮밥", "단호박 뇨끼",
+                    "새우 아보카도 포케", "닭갈비 볶음밥", "차돌 된장 파스타", "고등어 무조림",
+                    "감바스 알 아히요", "규동(소고기 덮밥)", "제육 쌈밥", "명란 크림 파스타",
+                    "토마토 해물 순두부", "잔치국수", "치킨 케사디아", "채소 프리타타",
+                ];
+                let rec = recPool[Math.floor(Math.random() * recPool.length)];
                 if (keywords.includes("와인")) {
-                    rec = "트러플 크림 소스를 곁들인 수비드 안심 뇨끼";
+                    rec = "카망베르 치즈와 구운 채소 안티파스토";
                 } else if (keywords.includes("매콤")) {
                     rec = "스파이시 타이 바질 해산물 토마토 스튜";
                 } else if (keywords.includes("든든")) {
@@ -1095,7 +1101,7 @@
             if (category === "themedRecipes") {
                 return `## **테마 맞춤 코스 요리 큐레이션**
 1. 에피타이저 칵테일 소스 석화 디쉬: 모임의 품격을 단번에 전개하는 최고급 핑거 푸드입니다. -> [가든 프레시 석화 플레이트] 전체 레시피 보기
-2. 트러플 아로마 안심 뇨끼: 녹진하고 깊은 향미를 남겨주는 이국적인 마스터피스입니다. -> [트러플 크림 안심 뇨끼] 전체 레시피 보기`;
+2. 감바스 알 아히요와 바게트: 마늘과 올리브오일의 풍미가 살아있는 스페인식 핑거 푸드입니다. -> [감바스 알 아히요] 전체 레시피 보기`;
             }
 
             if (category === "beveragePairing") {
@@ -1262,9 +1268,18 @@
         }
 
         async function onRecommendDish() {
-            const keywords = UIElements.whatToEatKeywords.value.trim() || "특별한 조건 없음";
-            const prompt = `사용자가 "오늘 뭐 먹지?" 고민을 하고 있습니다. 다음 키워드를 참고하여 어울리는 특별한 요리 1가지를 추천하고 그 요리를 권해드리는 미식가다운 추천 이유를 3줄 내외로 제안해주세요: "${keywords}".
-            응답 맨 아래 줄에 정확히 "-> [요리 이름] 전체 레시피 보기" 형식으로 버튼 자리표시자를 만들어주세요. 대괄호 안에는 추천한 요리 이름을 정확히 넣어주세요. 이 버튼 자리표시자는 다른 텍스트 없이 단독 라인으로 제공해주세요.`;
+            const kwRaw = UIElements.whatToEatKeywords.value.trim();
+            const keywords = kwRaw || "특별한 조건 없음";
+            // gemma tends to always fall back to the same "safe fancy" dish
+            // (e.g. 트러플 리조또). Seed each request with a random inspiration so
+            // the recommendation actually varies each time.
+            const rndPick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            const inspiration = `${rndPick(["한식","중식","일식","이탈리안","멕시칸","태국","인도","프랑스","베트남","분식","가정식","퓨전","지중해식"])} · ${rndPick(["따뜻한 국물","가벼운 한 끼","든든한 밥요리","매콤한","새콤달콤한","고소한","담백한","바삭한","간단한","보양식","술안주","해장"])} · ${rndPick(["면","밥","빵","두부","달걀","닭","돼지고기","소고기","해산물","채소","버섯","감자","김치"])} 계열`;
+            const seed = Math.floor(Math.random() * 100000);
+            const buttonRule = `응답 맨 아래 줄에 정확히 "-> [요리 이름] 전체 레시피 보기" 형식으로 버튼 자리표시자를 만들어주세요. 대괄호 안에는 추천한 요리 이름을 정확히 넣어주세요. 이 버튼 자리표시자는 다른 텍스트 없이 단독 라인으로 제공해주세요.`;
+            const prompt = kwRaw
+                ? `사용자가 "오늘 뭐 먹지?" 고민 중입니다. 키워드: "${kwRaw}". 키워드에 어울리는 특별한 요리 1가지를 추천하고 미식가다운 추천 이유를 3줄 내외로 작성해주세요. 매번 서로 다른 요리를 추천하고, 트러플·리조또처럼 뻔한 선택을 반복하지 마세요. (다양성 시드 ${seed})\n${buttonRule}`
+                : `사용자가 "오늘 뭐 먹지?" 고민 중이고 특별한 조건은 없습니다. 아래 '오늘의 영감'에서 힌트를 얻어 특별한 요리 1가지를 추천하고 미식가다운 추천 이유를 3줄 내외로 작성해주세요.\n오늘의 영감: ${inspiration}\n중요: 매번 서로 다른 요리를 추천하고, 트러플·리조또처럼 뻔한 선택은 절대 반복하지 마세요. (다양성 시드 ${seed})\n${buttonRule}`;
             const result = await getAIResponse(prompt, "recommendation", keywords);
             if (result.text) displayFormattedText(result.text, UIElements.recommendationDisplay, "오늘의 추천 요리", "recommendation");
         }
